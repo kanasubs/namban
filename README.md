@@ -5,7 +5,7 @@ first introduced in the japanese language as a consequence of the interaction
 between europeans and the japanese people.
 
 <img src="http://upload.wikimedia.org/wikipedia/commons/0/00/NanbanCarrack.jpg"
- alt="Namban Carrack" title="Namban Carrack" align="right" height=125 />
+ alt="Namban Carrack" title="Namban Carrack" align="right" height=65 />
 
 > "They eat with their fingers instead of with chopsticks such as we use. They
 show their feelings without any self-control. They cannot understand the meaning
@@ -30,7 +30,7 @@ and more.
 
 ### Install
 
-In project.clj: `[namban "0.1.1-alpha-SNAPSHOT"]`
+In project.clj: `[namban "0.1.1-alpha"]`
 
 ### Tatoeba
 
@@ -45,7 +45,7 @@ user=> (katakana->romaji "このパン")
 "このpan"
 user=> (long-vowel-syllab? "shū")
 truthy
-user=> (which-scripts "パソコンが難しいです。")
+user=> (scripts "パソコンが難しいです。")
 #{:katakana :hiragana :kanji}
 user=> (henkan "shuupatsu" :wapuro :kunrei)
 "shūpatsu"
@@ -66,7 +66,7 @@ words. This will change in future releases.
 - add numbers [0-9]
 - support katakana/romaji-upper-case and hiragana/romaji-lower-case
 - support hankaku-katanana
-- support Hyōjun-shiki
+- support hyōjun-shiki
 - consonant expansion
 - clojurescript support
 - clojure_py support
