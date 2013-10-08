@@ -46,7 +46,7 @@ and more.
 
 ### Install
 
-In project.clj: `[namban "0.1.1-alpha"]`
+In project.clj: `[namban "0.1.2"]`
 
 ### Tatoeba
 
