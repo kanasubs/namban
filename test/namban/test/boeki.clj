@@ -11,7 +11,8 @@
 	@#'boeki/hiragana-symbols => set?
   @#'boeki/consonants => set?
   @#'boeki/vowels => set?
-  @#'boeki/agyo => set?)
+  @#'boeki/agyo => set?
+  @#'boeki/sokuon-after-symbols => set?)
 
 (fact
   (@#'boeki/romaji-common \c) => truthy
@@ -74,11 +75,11 @@
 
 (fact
   @#'boeki/kana-sokuon => set?
-  (some-romaji-sokuon "kappa") => \p
-  (some-romaji-sokuon "arigatou") => nil
-  (some-kana-sokuon "トイレット") => \ッ
-  (some-kana-sokuon "ぎんこう") => nil
-  (some-sokuon "がんばって") => \っ)
+  (some-romaji-sokuon-comp "kappa") => "pp"
+  (some-romaji-sokuon-comp "arigatou") => nil
+  (some-kana-sokuon-comp "トイレット") => "ット"
+  (some-kana-sokuon-comp "ぎんこう") => nil
+  (some-sokuon-comp "がんばって") => "って")
 
 (fact
   \か => hiragana?
@@ -179,13 +180,13 @@
   (#'boeki/syllab-chunkify "hiしゃあ") => ["hi" "しゃあ"]
   (#'boeki/syllab-chunkify "くい") => ["く" "い"]
   (#'boeki/syllab-chunkify "カップ") => ["カ" "ップ"]
-  (#'boeki/syllab-chunkify "いらっしゃいませ") => ["い" "ら" "っしゃ" "い" "ま" "せ"]
+  (#'boeki/syllab-chunkify "いらっしゃいませ") => ["い" "ら" "っしゃ" "い" "ま" "せ"]  
   (#'boeki/syllab-chunkify "kappa") => ["ka" "ppa"]
   (#'boeki/syllab-chunkify "tsu") => ["tsu"]
   (#'boeki/syllab-chunkify "kan'i") => ["ka" "n'" "i"]
   (#'boeki/syllab-chunkify "kan-i") => ["ka" "n-" "i"]
   (#'boeki/syllab-chunkify
-    (str 
+    (str
       "うぅイィyiいぃイェyeいぇウァうぁウィwiうぃウゥwuウェweうぇウォwoうぉウュwyuうゅヴァva"
       "ゔぁヴィviゔぃvuヴェveゔぇヴォvoゔぉヴャvyaゔゃヴュvyuゔゅヴィェvyeゔぃぇヴョvyo"
       "ゔょキェkyeきぇギェgyeぎぇクァkwaくぁクィkwiくぃクェkweくぇクォkwoくぉクヮkwaグァ"
@@ -216,6 +217,9 @@
           "ロ゜" "lo" "ろ゜" "va" "vi" "ve" "vo" "ぢゃ" "ヂャ" "ja"
           "dya" "ぢょ" "ヂョ" "jo" "dyo" "ぢぇ" "ヂェ" "je" "zye" "クョ" "kyo"
           "くょ" "グョ" "gyo" "ぐょ" "くゎ"])
+  ;(\backspace \tab \newline \formfeed \return \space)
+  (#'boeki/syllab-chunkify \newline) => ["\n"] ; cannot use [\b\t\n\f\r] directly
+  (#'boeki/syllab-chunkify "\n") => ["\n"]
   (#'boeki/syllab-chunkify nil) => nil)
 
 ;(fact
@@ -373,6 +377,8 @@
   (katakana->hiragana "hiシャー") => "hiしゃあ"
   (katakana->romaji "カッパ") => "kappa"
   (katakana->hepburn "hiシャー") => "hishā"
+  (hiragana->hepburn "まっ") => "matsu"
+  (katakana->hepburn "ッ") => "tsu"
   (katakana->kunrei "hiシャー") => "hisyâ"
   (katakana->wapuro "hiシャー") => "hishaa"
 

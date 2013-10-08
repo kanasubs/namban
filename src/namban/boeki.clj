@@ -284,6 +284,12 @@
     "ぬねのはばぱひびぴふぶぷへべぺほぼぽまみむめもやゆよらりるれろゎわゐゑをんゔゕゖ"
     "ゝゞ" unpaired-hiragana)))
 
+(def ^:private sokuon-after-symbols
+  (set (str "かがきぎくぐけげこごさざしじすずせぜそぞただちぢつづてでと"
+            "どなにぬねのばぱびぴぶぷべぺぼぽまみむめもらりるれろゔゕゖ"
+            "カガキギクグケゲコゴサザシジスズセゼソゾタダチヂツヅテデト"
+            "ドナニヌネノバパビピブプベペボポマミムメモラリルレロヴヵヶ")))
+
 (def ^:private consonants (set "bcdfghjklmnprstvwyz"))
 
 (def ^:private vowels (set "ĀāĒēĪīŌōŪūÂâÊêÎîÔôÛûaiueoAIUEO"))
@@ -296,7 +302,7 @@
 (def ^:private hepburn-only (set "ĀāĒēĪīŌōŪū"))
 (def ^:private kunrei-only (set "ÂâÊêÎîÔôÛû"))
 
-(def ^:private kana-sokuon (union (set "っッ")))
+(def ^:private kana-sokuon (set "っッ"))
 
 (defn- find-first
   "Returns the first item of coll for which (pred item) returns logical true.
@@ -319,7 +325,7 @@
 (defn- jp-syllab?
   "Checks if string is a japanese syllab."
   [s]
-  (fn [m] (find-first (fn [[_ v]] (= s v)) m)))
+  (fn [m] (some (fn [[_ v]] (= s v)) m)))
 
 (defn- internal-script-kw
   "Converts a valid user input script keyword to a valid library script keyword."
@@ -394,23 +400,28 @@
      　 t (kw-initials target)]
     (t (find-first (jp-syllab? s) syllab-maps))))
 
-(defn- str-pred [f s]
+(defn- str-pred
   "Checks if all character(s) in string have predicate f."
+  [f s]
   (when s
     (if (char? s)
       (f s)
-      (not (find-first (comp not f) s)))))
+      (not (some (comp not f) s)))))
 
-(defn- kw-subgroups [kw]
+(defn- kw-subgroups
   "Returns the scripts belonging to the script keyword."
+  [kw]
   (case kw
     :shinboru-to-kutoten [:hiragana :katakana]
     :romaji [:romaji :kunrei-shiki :wapuro]
     [kw]))
 
-(defn some-kana-sokuon
-  "Returs kana sokuon or nil if it doesn't exist in string."
-  [s] (some kana-sokuon s))
+(defn some-kana-sokuon-comp
+  "Returs kana sokuon compound or nil if it doesn't exist."
+  [s]
+  (let [f #(when (kana-sokuon %2)
+             (some->> %1 inc (nthrest s) first sokuon-after-symbols (str %2)))]
+    (first (keep-indexed f s))))
 
 (defn consonants?
   "Checks if all character(s) in string are romaji consonants."
@@ -437,7 +448,7 @@
         (and (<= 0xff61 c) (<= c 0xff9f)))
       (let [f #(let [c (some-> % int)]
               (and (<= 0xff61 c) (<= c 0xff9f)))]
-        (not (find-first (comp not f) s))))))
+        (not (some (comp not f) s))))))
 
 (defn zenkaku-katakana?
   "Checks if all character(s) in string are zenkaku-katakana."
@@ -448,7 +459,7 @@
         (and (<= 0x30a0 c) (<= c 0x30ff)))
       (let [f #(let [c (some-> % int)]
               (and (<= 0x30a0 c) (<= c 0x30ff)))]
-        (not (find-first (comp not f) s))))))
+        (not (some (comp not f) s))))))
 
 (defn katakana?
   "Checks if all character(s) in string are katakana."
@@ -485,16 +496,22 @@
        (some #{%} "！？"))
     s))
 
-(defn some-romaji-sokuon
-  "Returs romaji sokuon or nil if it doesn't exist in string."
+(defn some-romaji-sokuon-comp
+  "Returs romaji sokuon compound or nil if it doesn't exist in string.
+   Compound refers to sokuon followed by 'consonant'"
   [s]
   (when (romaji? s)
     (let [=2 (comp (partial = 2) count)]
-      (->> (partition-by identity s) (find-first =2) first))))
+      (some->> (partition-by identity s)
+               (find-first =2)
+               first
+               (repeat 2)
+               (apply str)))))
 
-(defn some-sokuon
-  "Returs sokuon or nil if it doesn't exist in string."
-  [s] (or (some-kana-sokuon s) (some-romaji-sokuon s)))
+(defn some-sokuon-comp
+  "Returs truthy if there is a sokuon compound or falsey otherwise.
+   Compound refers to sokuon followed by 'consonant'"
+  [s] (or (some-kana-sokuon-comp s) (some-romaji-sokuon-comp s)))
 
 (defn- kana-agyo-igai-fns
   "Receives a kana predicate and returns its corresponding consonant fn."
@@ -515,7 +532,7 @@
     (str
       romaji-chunk-re "|"
       katakana-chunk-re "|"
-      hiragana-chunk-re "|.")))
+      hiragana-chunk-re "|[\n\b\t\f\r]|.")))
 
 (defn- syllab-chunkify
   "Given a string, returns ordered coll of potential japanese syllabs."
@@ -551,9 +568,10 @@
 (defn- kw-subgroups-of [s]
   (->> (internal-scripts s) (map kw-subgroups) flatten (into #{})))
 
-(defn- apply-long-vowel [syllab long-vowel-map & [target]]
+(defn- apply-long-vowel
   "Applies target long vowel supplied in long-vowel-map to a vanilla syllab.
    Target long vowel is calculated or supplied as param."
+  [syllab long-vowel-map & [target]]
   (let [target-long-vowel
           (-> (or target (-> syllab internal-scripts first))
               kw-initials long-vowel-map)]
@@ -585,8 +603,8 @@
         upper-vowels? #(every? identity (map (set "AIUEO") %))
         last-vowels (apply str [(-> s butlast last) (last s)])
         long-vowels (or (lower-vowels? last-vowels) (upper-vowels? last-vowels))
-        long-vowel? #(find-first (fn [[_ v]] (= (-> s last str) v)) %)
-        long-vowels? #(find-first (fn [[_ v]] (= last-vowels v)) %)]
+        long-vowel? #(some (fn [[_ v]] (= (-> s last str) v)) %)
+        long-vowels? #(some (fn [[_ v]] (= last-vowels v)) %)]
     (find-first (if long-vowels long-vowels? long-vowel?) long-vowel-symbols)))
 
 (defn- sokuon-for
@@ -625,7 +643,7 @@
 (defmethod convert-syllab :default [target & [_]]
   (fn [s]
     (let [s (str s)]
-      (if (some-sokuon s)
+      (if (some-sokuon-comp s)
         (str
            (sokuon-for (take 2 s) target) ; also takes lookahead char
            ((convert-syllab target) (apply str (drop 1 s))))
