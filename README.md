@@ -49,7 +49,11 @@ and more.
 In project.clj: `[namban "0.1.3"]`
 
 ### Tatoeba
+<<<<<<< HEAD
 API is available both in romaji and kana.
+=======
+API is available both in romaji and kana:
+>>>>>>> b965677... updated README.md with kana example and minor fixes
 ```clojure
 user=> (use 'namban.boeki)
 nil
