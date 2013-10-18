@@ -8,10 +8,12 @@
 (def ^:private syllab-maps
  (let [m
     [; TODO complete kutoten
-     ; TODO support conversion from old versions of hepburn and nihon-shiki
-     {:h "。" :k "。" :r "."} {:h "、" :k　"、" :r ","} {:h "？" :k "？" :r "?"}
-     {:h "！" :k "！" :r "!"} {:h "　" :k "　" :r " "} {:h "ゝ" :k "ヽ"}
-     {:h "ゞ" :k "ヾ"}
+     ; TODO support conversion from old versions of hebon and nihon-shiki
+     {:k "０" :r "0"} {:k "１" :r "1"} {:k "２" :r "2"} {:k "３" :r "3"}
+     {:k "４" :r "4"} {:k "５" :r "5"} {:k "６" :r "6"}
+     {:k "７" :r "7"} {:k "８" :r "8"} {:k "９" :r "9"}
+     {:k "。" :r "."} {:k "、" :r ","} {:k "？" :r "?"} {:k "！" :r "!"}
+     {:k "　" :r " "} {:h "ゝ" :k "ヽ"} {:h "ゞ" :k "ヾ"}
      
      {:h "あ" :k "ア" :r "a"} {:h "い" :k "イ" :r "i"} {:h "う" :k "ウ" :r "u"}
      {:h "え" :k "エ" :r "e"} {:h "お" :k "オ" :r "o"}
@@ -160,7 +162,7 @@
 
      {:k "チェ" :r "che" :ks "tye" :h "ちぇ"}
 
-     {:k "ツァ" :r "tsa" :h "つぁ"}　{:h "つぃ" :k "ツィ" :r "tsi"}
+     {:k "ツァ" :r "tsa" :h "つぁ"} {:h "つぃ" :k "ツィ" :r "tsi"}
 
      {:h "つぇ" :k "ツェ" :r "tse"} {:h "つぉ" :k "ツォ" :r "tso"}
 
@@ -245,6 +247,7 @@
      {:k "グョ" :r "gyo" :h "ぐょ"} ; "gyo" duplicate; cannot input グョ -> low priority
     ]]
    (into [] (map #(assoc %
+                    :h (or (:h %) (:k %))
                     :r (or (:r %) (:ks %))
                     :ks (or (:ks %) (:r %))
                     :w (or (:w %) (:r %) (:ks %)))
@@ -299,7 +302,7 @@
 (def ^:private romaji-common (set (str "abcdefghijkmnoprstuvwyz"
                         "ABCDEFGHIJKMNOPRSTUVWYZ")))
 
-(def ^:private hepburn-only (set "ĀāĒēĪīŌōŪū"))
+(def ^:private hebon-dake (set "ĀāĒēĪīŌōŪū"))
 (def ^:private kunrei-only (set "ÂâÊêÎîÔôÛû"))
 
 (def ^:private kana-sokuon (set "っッ"))
@@ -331,7 +334,7 @@
   "Converts a valid user input script keyword to a valid library script keyword."
   [f]
   (case f
-    :hepburn :romaji
+    :hebon :romaji
     :zenkaku-katakana :katakana
     :kunrei :kunrei-shiki
     f))
@@ -397,7 +400,7 @@
 ;      but of different scripts why may result in different syllab maps
 (defn- find-jp-syllab [s target]
   (let [s (str s)
-     　 t (kw-initials target)]
+        t (kw-initials target)]
     (t (find-first (jp-syllab? s) syllab-maps))))
 
 (defn- str-pred
@@ -475,9 +478,9 @@
 
 (def kunrei-shiki? kunrei?)
 
-(defn hepburn?
-  "Checks if all character(s) in string are hepburn romaji."
-  [s] (str-pred #(or (romaji-common %) (hepburn-only %)) s))
+(defn hebon?
+  "Checks if all character(s) in string are hebon romaji."
+  [s] (str-pred #(or (romaji-common %) (hebon-dake %)) s))
 
 (defn wapuro?
   "Checks if all character(s) in string are wāpuro romaji."
@@ -485,7 +488,7 @@
 
 (defn romaji?
   "Checks if all character(s) in string are any kind of romaji."
-  [s] (str-pred #(or (romaji-common %) (hepburn-only %) (kunrei-only %)) s))
+  [s] (str-pred #(or (romaji-common %) (hebon-dake %) (kunrei-only %)) s))
 
 (defn shinboru-to-kutoten?
   "Checks if all character(s) in string are japanese punctuation."
@@ -672,24 +675,43 @@
         (some-> s convert-syllab first)
         (some->> s syllab-chunkify (map convert-syllab) (reduce str))))))
 
+(def へんかん henkan)
+
 (defn hiragana "Converts syllabs of string to hiragana."
   [s] (henkan s :hiragana))
+
+(def ひらがな hiragana)
 
 (defn zenkaku-katakana "Converts syllabs of string to zenkaku katakana."
   [s] (henkan s :katakana))
 
 (def katakana zenkaku-katakana)
+(def カタカナ zenkaku-katakana)
+(def ゼンカクカタカナ zenkaku-katakana)
 
 (defn romaji "Converts syllabs of string to romaji."
   [s] (henkan s :romaji))
+
+(def ローマじ romaji)
+
+(defn hebon "Converts syllabs of string to hebon."
+  [s] (henkan s :hebon))
+
+(def hebon-shiki hebon)
+(def ヘボン hebon)
+(def ヘボンしき hebon)
 
 (defn kunrei "Converts syllabs of string to kunrei."
   [s] (henkan s :kunrei-shiki))
 
 (def kunrei-shiki kunrei)
+(def くんれい kunrei)
+(def くんれいしき kunrei)
 
 (defn wapuro "Converts syllabs of string to wāpuro."
   [s] (henkan s :wapuro))
+
+(def ワープロ wapuro)
 
 (defn hiragana->zenkaku-katakana
   "Converts syllabs in hiragana to katakana.
@@ -697,16 +719,24 @@
   [s] (henkan s :hiragana :katakana))
 
 (def hiragana->katakana hiragana->zenkaku-katakana)
+(def ひらがな→カタカナ hiragana->zenkaku-katakana)
+(def ひらがな→ぜんかくカタカナ hiragana->zenkaku-katakana)
 
 (defn hiragana->romaji
   "Converts syllabs in hiragana to romaji.
    Leaves the rest of the string intact."
   [s] (henkan s :hiragana :romaji))
 
-(defn hiragana->hepburn
-  "Converts syllabs in hiragana to hepburn.
+(def ひらがな→ローマじ hiragana->romaji)
+
+(defn hiragana->hebon
+  "Converts syllabs in hiragana to hebon.
    Leaves the rest of the string intact."
-  [s] (henkan s :hiragana :hepburn))
+  [s] (henkan s :hiragana :hebon))
+
+(def hiragana->hebon-shiki hiragana->hebon)
+(def ひらがな→ヘボンしき hiragana->hebon)
+(def ひらがな→ヘボンしき hiragana->hebon)
 
 (defn hiragana->kunrei
   "Converts syllabs in hiragana to kunrei.
@@ -714,11 +744,15 @@
   [s] (henkan s :hiragana :kunrei-shiki))
 
 (def hiragana->kunrei-shiki hiragana->kunrei)
+(def ひらがな→くんれい hiragana->kunrei)
+(def ひらがな→くんれいしき hiragana->kunrei)
 
 (defn hiragana->wapuro
   "Converts syllabs in hiragana to wāpuro.
    Leaves the rest of the string intact."
   [s] (henkan s :hiragana :wapuro))
+
+(def ひらがな→ワープロ hiragana->wapuro)
 
 (defn zenkaku-katakana->hiragana
   "Converts syllabs in katakana to hiragana.
@@ -726,6 +760,8 @@
   [s] (henkan s :katakana :hiragana))
 
 (def katakana->hiragana zenkaku-katakana->hiragana)
+(def ぜんかくカタカナ→ひらがな zenkaku-katakana->hiragana)
+(def カタカナ→ひらがな zenkaku-katakana->hiragana)
 
 (defn zenkaku-katakana->romaji
   "Converts syllabs in katakana to romaji.
@@ -733,13 +769,21 @@
   [s] (henkan s :katakana :romaji))
 
 (def katakana->romaji zenkaku-katakana->romaji)
+(def ぜんかくカタカナ→ローマじ zenkaku-katakana->romaji)
+(def カタカナ→ローマじ zenkaku-katakana->romaji)
 
-(defn zenkaku-katakana->hepburn
-  "Converts syllabs in katakana to hepburn.
+(defn zenkaku-katakana->hebon
+  "Converts syllabs in katakana to hebon.
    Leaves the rest of the string intact."
-  [s] (henkan s :katakana :hepburn))
+  [s] (henkan s :katakana :hebon))
 
-(def katakana->hepburn zenkaku-katakana->hepburn)
+(def katakana->hebon zenkaku-katakana->hebon)
+(def katakana->hebon-shiki zenkaku-katakana->hebon)
+(def zenkaku-katakana->hebon-shiki zenkaku-katakana->hebon)
+(def ぜんかくカタカナ→ヘボン zenkaku-katakana->hebon)
+(def カタカナ→ヘボン zenkaku-katakana->hebon)
+(def カタカナ→ヘボンしき zenkaku-katakana->hebon)
+(def ぜんかくカタカナ→ヘボンしき zenkaku-katakana->hebon)
 
 (defn zenkaku-katakana->kunrei
   "Converts syllabs in katakana to kunrei.
@@ -749,6 +793,10 @@
 (def katakana->kunrei-shiki zenkaku-katakana->kunrei)
 (def katakana->kunrei zenkaku-katakana->kunrei)
 (def zenkaku-katakana->kunrei-shiki zenkaku-katakana->kunrei)
+(def ぜんかくカタカナ→くんれい zenkaku-katakana->kunrei)
+(def カタカナ→くんれいしき zenkaku-katakana->kunrei)
+(def カタカナ→くんれい zenkaku-katakana->kunrei)
+(def ぜんかくカタカナ→ヘボンしき zenkaku-katakana->kunrei)
 
 (defn zenkaku-katakana->wapuro
   "Converts syllabs in katakana to wāpuro.
@@ -756,11 +804,15 @@
   [s] (henkan s :katakana :wapuro))
 
 (def katakana->wapuro zenkaku-katakana->wapuro)
+(def ぜんかくカタカナ→ワープロ zenkaku-katakana->wapuro)
+(def カタカナ→ワープロ zenkaku-katakana->wapuro)
 
 (defn romaji->hiragana
   "Converts syllabs in romaji to hiragana.
    Leaves the rest of the string intact."
   [s] (henkan s :romaji :hiragana))
+
+(def ローマじ→ひらがな romaji->hiragana)
 
 (defn romaji->zenkaku-katakana
   "Converts syllabs in romaji to hiragana.
@@ -768,11 +820,17 @@
   [s] (henkan s :romaji :katakana))
 
 (def romaji->katakana romaji->zenkaku-katakana)
+(def ローマじ→ぜんかくカタカナ romaji->zenkaku-katakana)
+(def ローマじ→カタカナ romaji->zenkaku-katakana)
 
-(defn romaji->hepburn
-  "Converts syllabs in romaji to hepburn.
+(defn romaji->hebon
+  "Converts syllabs in romaji to hebon.
    Leaves the rest of the string intact."
-  [s] (henkan s :romaji :hepburn))
+  [s] (henkan s :romaji :hebon))
+
+(def romaji->hebon-shiki romaji->hebon)
+(def ローマじ→ヘボン romaji->hebon)
+(def ローマじ→ヘボンしき romaji->hebon)
 
 (defn romaji->kunrei
   "Converts syllabs in romaji to kunrei.
@@ -780,40 +838,68 @@
   [s] (henkan s :romaji :kunrei-shiki))
 
 (def romaji->kunrei-shiki romaji->kunrei)
+(def ローマじ→くんれい romaji->kunrei)
+(def ローマじ→くんれいしき romaji->kunrei)
 
 (defn romaji->wapuro
   "Converts syllabs in romaji to wāpuro.
    Leaves the rest of the string intact."
   [s] (henkan s :romaji :wapuro))
 
-(defn hepburn->hiragana
-  "Converts syllabs in hepburn to hiragana.
+(def ローマじ→ワープロ romaji->wapuro)
+
+(defn hebon->hiragana
+  "Converts syllabs in hebon to hiragana.
    Leaves the rest of the string intact."
-  [s] (henkan s :hepburn :hiragana))
+  [s] (henkan s :hebon :hiragana))
 
-(defn hepburn->zenkaku-katakana
-  "Converts syllabs in hepburn to katakana.
+(def hebon-shiki->hiragana hebon->hiragana)
+(def ヘボン→ひらがな hebon->hiragana)
+(def ヘボンしき→ひらがな hebon->hiragana)
+
+(defn hebon->zenkaku-katakana
+  "Converts syllabs in hebon to katakana.
    Leaves the rest of the string intact."
-  [s] (henkan s :hepburn :katakana))
+  [s] (henkan s :hebon :katakana))
 
-(def hepburn->katakana hepburn->zenkaku-katakana)
+(def hebon->katakana hebon->zenkaku-katakana)
+(def hebon-shiki->katakana hebon->zenkaku-katakana)
+(def hebon-shiki->zenkaku-katakana hebon->zenkaku-katakana)
+(def ヘボン→ぜんかくカタカナ hebon->zenkaku-katakana)
+(def ヘボン→カタカナ hebon->zenkaku-katakana)
+(def ヘボンしき→カタカナ hebon->zenkaku-katakana)
+(def ヘボンしき→ぜんかくカタカナ hebon->zenkaku-katakana)
 
-(defn hepburn->romaji
-  "Converts syllabs in hepburn to romaji.
+(defn hebon->romaji
+  "Converts syllabs in hebon to romaji.
    Leaves the rest of the string intact."
-  [s] (henkan s :hepburn :romaji))
+  [s] (henkan s :hebon :romaji))
 
-(defn hepburn->kunrei
-  "Converts syllabs in hepburn to kunrei.
+(def hebon-shiki->romaji hebon->romaji)
+(def ヘボン→ローマじ hebon->romaji)
+(def ヘボンしき→ローマじ hebon->romaji)
+
+(defn hebon->kunrei
+  "Converts syllabs in hebon to kunrei.
    Leaves the rest of the string intact."
-  [s] (henkan s :hepburn :kunrei-shiki))
+  [s] (henkan s :hebon :kunrei-shiki))
 
-(def hepburn->kunrei-shiki hepburn->kunrei)
+(def hebon->kunrei-shiki hebon->kunrei)
+(def hebon-shiki->kunrei hebon->kunrei)
+(def hebon-shiki->kunrei-shiki hebon->kunrei)
+(def ヘボン→くんれい hebon->kunrei)
+(def ヘボン→くんれいしき hebon->kunrei)
+(def ヘボンしき→くんれい hebon->kunrei)
+(def ヘボンしき→くんれいしき hebon->kunrei)
 
-(defn hepburn->wapuro
-  "Converts syllabs in hepburn to wāpuro.
+(defn hebon->wapuro
+  "Converts syllabs in hebon to wāpuro.
    Leaves the rest of the string intact."
-  [s] (henkan s :hepburn :wapuro))
+  [s] (henkan s :hebon :wapuro))
+
+(def hebon-shiki->wapuro hebon->wapuro)
+(def ヘボン→ワープロ hebon->wapuro)
+(def ヘボンしき→ワープロ hebon->wapuro)
 
 (defn kunrei->hiragana
   "Converts syllabs in kunrei to hiragana.
@@ -821,6 +907,8 @@
   [s] (henkan s :kunrei-shiki :hiragana))
 
 (def kunrei-shiki->hiragana kunrei->hiragana)
+(def くんれい→ひらがな kunrei->hiragana)
+(def くんれいしき→ひらがな kunrei->hiragana)
 
 (defn kunrei->zenkaku-katakana
   "Converts syllabs in kunrei to katakana.
@@ -828,6 +916,12 @@
   [s] (henkan s :kunrei-shiki :katakana))
 
 (def kunrei->katakana kunrei->zenkaku-katakana)
+(def kunrei-shiki->katakana kunrei->zenkaku-katakana)
+(def kunrei-shiki->zenkaku-katakana kunrei->zenkaku-katakana)
+(def くんれい→ぜんかくカタカナ kunrei->zenkaku-katakana)
+(def くんれい→カタカナ kunrei->zenkaku-katakana)
+(def くんれいしき→カタカナ kunrei->zenkaku-katakana)
+(def くんれいしき→ぜんかくカタカナ kunrei->zenkaku-katakana)
 
 (defn kunrei->romaji
   "Converts syllabs in kunrei to romaji.
@@ -835,13 +929,21 @@
   [s] (henkan s :kunrei-shiki :romaji))
 
 (def kunrei-shiki->romaji kunrei->romaji)
+(def くんれい→ローマじ kunrei->romaji)
+(def くんれいしき→ローマじ kunrei->romaji)
 
-(defn kunrei->hepburn
-  "Converts syllabs in kunrei to hepburn.
+(defn kunrei->hebon
+  "Converts syllabs in kunrei to hebon.
    Leaves the rest of the string intact."
-  [s] (henkan s :kunrei-shiki :hepburn))
+  [s] (henkan s :kunrei-shiki :hebon))
 
-(def kunrei-shiki->hepburn kunrei->hepburn)
+(def kunrei->hebon-shiki kunrei->hebon)
+(def kunrei-shiki->hebon kunrei->hebon)
+(def kunrei-shiki->hebon-shiki kunrei->hebon)
+(def くんれい→ヘボン kunrei->hebon)
+(def くんれい→ヘボンしき kunrei->hebon)
+(def くんれいしき→ヘボン kunrei->hebon)
+(def くんれいしき→ヘボンしき kunrei->hebon)
 
 (defn kunrei->wapuro
   "Converts syllabs in kunrei to wāpuro.
@@ -849,6 +951,8 @@
   [s] (henkan s :kunrei-shiki :wapuro))
 
 (def kunrei-shiki->wapuro kunrei->wapuro)
+(def くんれい→ワープロ kunrei->wapuro)
+(def くんれいしき→ワープロ kunrei->wapuro)
 
 ;TODO desambiguation of long vowels
 ; methods:
@@ -856,4 +960,4 @@
 ;   2- dictionary entries
 ;
 ; add ignore wapuro chunking option
-; create wapuro-syllabs? / hepburn-syllabs? / kunrei-syllabs?
+; create wapuro-syllabs? / hebon-syllabs? / kunrei-syllabs?

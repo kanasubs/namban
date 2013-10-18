@@ -23,11 +23,11 @@
   (@#'boeki/romaji-common \と) => falsey)
 
 (fact
-  (@#'boeki/hepburn-only \ā) => truthy
-  (@#'boeki/hepburn-only "ā") => falsey
-  (@#'boeki/hepburn-only \d) => falsey
-  (@#'boeki/hepburn-only \あ) => falsey
-  (@#'boeki/hepburn-only \ア) => falsey)
+  (@#'boeki/hebon-dake \ā) => truthy
+  (@#'boeki/hebon-dake "ā") => falsey
+  (@#'boeki/hebon-dake \d) => falsey
+  (@#'boeki/hebon-dake \あ) => falsey
+  (@#'boeki/hebon-dake \ア) => falsey)
 
 (fact
   (@#'boeki/kunrei-only \â) => truthy
@@ -42,12 +42,12 @@
 
 (fact
   (#'boeki/jp-syllab? "あ") => fn?
-  ((#'boeki/jp-syllab? "あ") {:h "あ" :r "a" :k "ア"})　=> truthy
-  ((#'boeki/jp-syllab? "い") {:h "あ" :r "a" :k "ア"})　=> falsey
-  ((#'boeki/jp-syllab? nil) {:h "あ" :r "a" :k "ア"})　=> falsey)
+  ((#'boeki/jp-syllab? "あ") {:h "あ" :r "a" :k "ア"}) => truthy
+  ((#'boeki/jp-syllab? "い") {:h "あ" :r "a" :k "ア"}) => falsey
+  ((#'boeki/jp-syllab? nil) {:h "あ" :r "a" :k "ア"}) => falsey)
 
 (fact
-  (#'boeki/internal-script-kw :hepburn) => :romaji
+  (#'boeki/internal-script-kw :hebon) => :romaji
   (#'boeki/internal-script-kw :zenkaku-katakana) => :katakana
   (#'boeki/internal-script-kw :hankaku-katakana) => :hankaku-katakana
   (#'boeki/internal-script-kw :kunrei) => :kunrei-shiki
@@ -128,12 +128,12 @@
   nil => (complement kunrei?))
 
 (fact
-  "shū" => hepburn?
-  "shu" => hepburn?
-  "shâ" => (complement hepburn?)
-  "しゅ" => (complement hepburn?)
-  "シュ" => (complement hepburn?)
-  nil => (complement hepburn?))
+  "shū" => hebon?
+  "shu" => hebon?
+  "shâ" => (complement hebon?)
+  "しゅ" => (complement hebon?)
+  "シュ" => (complement hebon?)
+  nil => (complement hebon?))
 
 (fact
   \ā => romaji?
@@ -285,15 +285,15 @@
 
 (fact
   (#'boeki/find-long-vowel-map "ラー")
-  　　=> {:o "a" :w "aa" :r "ā" :ks "â" :h "あ" :k "ー" :kai @#'boeki/kai-a}
+    => {:o "a" :w "aa" :r "ā" :ks "â" :h "あ" :k "ー" :kai @#'boeki/kai-a}
   (#'boeki/find-long-vowel-map "リー")
-  　　=> {:o "i" :w "ii" :r "ī" :ks "î" :h "い" :k "ー" :kai @#'boeki/kai-i}
+    => {:o "i" :w "ii" :r "ī" :ks "î" :h "い" :k "ー" :kai @#'boeki/kai-i}
   (#'boeki/find-long-vowel-map "ルー")
-  　　=> {:o "u" :w "uu" :r "ū" :ks "û" :h "う" :k "ー" :kai @#'boeki/kai-u}
+    => {:o "u" :w "uu" :r "ū" :ks "û" :h "う" :k "ー" :kai @#'boeki/kai-u}
   (#'boeki/find-long-vowel-map "レー")
-  　　=> {:o "e" :w "ee" :r "ē" :ks "ê" :h "え" :k "ー" :kai @#'boeki/kai-e}
+    => {:o "e" :w "ee" :r "ē" :ks "ê" :h "え" :k "ー" :kai @#'boeki/kai-e}
   (#'boeki/find-long-vowel-map "ロー")
-  　　=> {:o "o" :w "ou" :r "ō" :ks "ô" :h "う" :k "ー" :kai @#'boeki/kai-o}
+    => {:o "o" :w "ou" :r "ō" :ks "ô" :h "う" :k "ー" :kai @#'boeki/kai-o}
   (#'boeki/find-long-vowel-map "shū")
      => {:o "u" :w "uu" :r "ū" :ks "û" :h "う" :k "ー" :kai @#'boeki/kai-u})
 
@@ -370,55 +370,58 @@
     => "あぶないですからきろいせん　の　うちがわでおまちください")
 
 (fact
+  (hiragana "ドーitashimashite") => "どういたしまして"
+  (hiragana "namban") => "なんばん"
+  (hiragana "kan'i") => "かんい"
+  (hiragana "kan-i") => "かんい"
+  (hiragana "ヷヸヹヺ") => "ゔぁゔぃゔぇゔぉ"
+  (hiragana nil) => nil)
+
+(fact
+  (katakana "どうitashimashite") => "ドーイタシマシテ"
+  (katakana nil) => nil)
+
+(fact
+  (romaji "どうイタシマシテ") => "dōitashimashite"
+  (romaji nil) => nil)
+
+(fact
+  (kunrei "shūpatsu") => "syûpatu"
+  (kunrei nil) => nil)
+
+(fact
+  (hebon "０１２３４５６７８９") => "0123456789")
+
+(fact
   (let [hiragana-juxt
-  	      (juxt hiragana->katakana hiragana->romaji hiragana->hepburn hiragana->kunrei)]
+  	      (juxt hiragana->katakana hiragana->romaji hiragana->hebon hiragana->kunrei)]
   	(hiragana-juxt "hiしゃあ")) => ["hiシャー" "hishā" "hishā" "hisyâ"]
 
   (katakana->hiragana "hiシャー") => "hiしゃあ"
   (katakana->romaji "カッパ") => "kappa"
-  (katakana->hepburn "hiシャー") => "hishā"
-  (hiragana->hepburn "まっ") => "matsu"
-  (katakana->hepburn "ッ") => "tsu"
+  (katakana->hebon "hiシャー") => "hishā"
+  (hiragana->hebon "まっ") => "matsu"
+  (katakana->hebon "ッ") => "tsu"
   (katakana->kunrei "hiシャー") => "hisyâ"
   (katakana->wapuro "hiシャー") => "hishaa"
 
   (romaji->hiragana "koppu") => "こっぷ"
   (romaji->katakana "shūさあ") => "シューさあ"
-  (romaji->hepburn "shūさあ") => "shūさあ"
+  (romaji->hebon "shūさあ") => "shūさあ"
   (romaji->kunrei "shūさあ") => "syûさあ"
   (romaji->wapuro "shūさあ") => "shuuさあ"
 
-  (hepburn->hiragana "shūさあ") => "しゅうさあ"
-  (hepburn->katakana "shūさあ") => "シューさあ"
-  (hepburn->romaji "shūさあ") => "shūさあ"
-  (hepburn->kunrei "shūさあ") => "syûさあ"
-  (hepburn->wapuro "shūさあ") => "shuuさあ"
+  (hebon->hiragana "shūさあ") => "しゅうさあ"
+  (hebon->katakana "shūさあ") => "シューさあ"
+  (hebon->romaji "shūさあ") => "shūさあ"
+  (hebon->kunrei "shūさあ") => "syûさあ"
+  (hebon->wapuro "shūさあ") => "shuuさあ"
 
   (kunrei->hiragana "shûさあ") => "しゅうさあ"
   (kunrei->katakana "shûさあ") => "シューさあ"
   (kunrei->romaji "shûさあ") => "shūさあ"
-  (kunrei->hepburn "shûさあ") => "shūさあ"
+  (kunrei->hebon "shûさあ") => "shūさあ"
   (kunrei->wapuro "shûさあ") => "shuuさあ"
   (kunrei->hiragana "sha") => "しゃ"
 
   (katakana->kunrei nil) => nil)
-
-  (fact
-    (hiragana "ドーitashimashite") => "どういたしまして"
-    (hiragana "namban") => "なんばん"
-    (hiragana "kan'i") => "かんい"
-    (hiragana "kan-i") => "かんい"
-    (hiragana "ヷヸヹヺ") => "ゔぁゔぃゔぇゔぉ"
-    (hiragana nil) => nil)
-
-  (fact
-	  (katakana "どうitashimashite") => "ドーイタシマシテ"
-    (katakana nil) => nil)
-
-  (fact
-	  (romaji "どうイタシマシテ") => "dōitashimashite"
-    (romaji nil) => nil)
-
-  (fact
-	  (kunrei "shūpatsu") => "syûpatu"
-    (kunrei nil) => nil)
