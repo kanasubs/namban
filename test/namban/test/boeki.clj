@@ -37,14 +37,8 @@
   (@#'boeki/kunrei-only \ア) => falsey)
 
 (fact
-  (@#'boeki/find-first even? [3 2 1 0]) => 2
-  (@#'boeki/find-first even? [3 1]) => nil)
-
-(fact
-  (#'boeki/jp-syllab? "あ") => fn?
-  ((#'boeki/jp-syllab? "あ") {:h "あ" :r "a" :k "ア"}) => truthy
-  ((#'boeki/jp-syllab? "い") {:h "あ" :r "a" :k "ア"}) => falsey
-  ((#'boeki/jp-syllab? nil) {:h "あ" :r "a" :k "ア"}) => falsey)
+  (@#'boeki/ffilter even? [3 2 1 0]) => 2
+  (@#'boeki/ffilter even? [3 1]) => nil)
 
 (fact
   (#'boeki/internal-script-kw :hebon) => :romaji
@@ -79,7 +73,8 @@
   (some-romaji-sokuon-comp "arigatou") => nil
   (some-kana-sokuon-comp "トイレット") => "ット"
   (some-kana-sokuon-comp "ぎんこう") => nil
-  (some-sokuon-comp "がんばって") => "って")
+  (some-sokuon-comp "がんばって") => "って"
+  (some-sokuon-comp "oo") => nil)
 
 (fact
   \か => hiragana?
@@ -146,6 +141,25 @@
   \@ => (complement romaji?)
   \[ => (complement romaji?))
 
+(fact "yakumono and punctuation"
+  (yakumono?
+    (str "　。、？！（）｛｝［］ー【】〔〕〈〉《》「」『』「」『』々ヽヾゝゞ〃っ゛・゜〆〜…※＊〓"
+         "〄〇〒〖〗〘〙〚〛〝〞〟〠〡〢〣〤〥〦〧〨〩〪〭〮〯〫〬〰〱〲〳〴〵〶〷〸〹〺〻〼〽〾〿"))
+    => truthy
+  (romaji-yakumono? " .") => truthy
+  (yakumono "San byaku yen desu.") => "San　byaku　yen　desu。"
+  (romaji-yakumono "三　百円　です。") => "三 百円 です.")
+
+(fact "numerals"
+  (suji? "９ａＢ") => truthy
+  (arabia-suji? "x10aB") => truthy
+  (arabia-suji? "1") => truthy
+  (arabia-suji? "0aB") => falsey
+  (suji "9aB") => "９aB"
+  (suji "0x9eab") => "０x９ａｂ"
+  (suji "っと") => "っと"
+  (arabia-suji "９ａＢ") => "9aB")
+
 (fact
   "e" => wapuro?
   \r => wapuro?
@@ -153,8 +167,8 @@
   nil => (complement wapuro?))
 
 (fact
-  "〱〵〹〺。？！" => shinboru-to-kutoten?
-  nil => (complement shinboru-to-kutoten?))
+  "〱〵〹〺。？！" => yakumono?
+  nil => (complement yakumono?))
 
 (fact
   \ア => kana?
@@ -233,22 +247,18 @@
   (#'boeki/char-jp-script nil) => nil)
 
 (fact
-  (#'boeki/kw-subgroups :shinboru-to-kutoten) => [:hiragana :katakana])
+  (#'boeki/kw-subgroups-of "どうしたの？") => #{:hiragana :yakumono})
 
 (fact
-  (#'boeki/kw-subgroups-of "どうしたの？") => #{:hiragana :katakana})
-
-(fact
-  (scripts "ぶんしんさば") => (just [:hiragana])
+  (scripts "ぶんしんさば") => #{:hiragana}
   (scripts "shinjitsuハひとつ")
-    => (just [:romaji :zenkaku-katakana :hiragana])
+    => #{:romaji :zenkaku-katakana :hiragana}
   (scripts "パソコンが難しいです。")
-    => (just [:zenkaku-katakana :hiragana :kanji :shinboru-to-kutoten]))
+    => #{:zenkaku-katakana :hiragana :kanji :yakumono})
 
 (fact
-  (#'boeki/find-jp-syllab "お" :kunrei-shiki) => "o"
-  (#'boeki/find-jp-syllab "お" :wapuro) => "o"
-  (#'boeki/find-jp-syllab "tsu" :kunrei-shiki) => "tu")
+  (#'boeki/ffilter-syllab "お") => map?
+  (#'boeki/ffilter-syllab "abc") => falsey)
 
 (fact
   (#'boeki/sokuon-for "ss" :hiragana) => \っ
@@ -258,10 +268,10 @@
 (fact
   (let [convert-syllab-to-romaji (#'boeki/convert-syllab :romaji)
         convert-syllab-to-wapuro (#'boeki/convert-syllab :wapuro)
-        convert-vanilla-syllab-to-hiragana (#'boeki/convert-syllab :hiragana :final)
-        convert-vanilla-syllab-to-katakana (#'boeki/convert-syllab :katakana :final)
-        convert-vanilla-syllab-to-wapuro (#'boeki/convert-syllab :wapuro :final)
-        convert-vanilla-syllab-to-kunrei (#'boeki/convert-syllab :kunrei-shiki :final)]
+        convert-vanilla-syllab-to-hiragana (#'boeki/convert-syllab :hiragana)
+        convert-vanilla-syllab-to-katakana (#'boeki/convert-syllab :katakana)
+        convert-vanilla-syllab-to-wapuro (#'boeki/convert-syllab :wapuro)
+        convert-vanilla-syllab-to-kunrei (#'boeki/convert-syllab :kunrei-shiki)]
     (convert-syllab-to-romaji "st") => "st"
     (convert-syllab-to-romaji "sta") => "sta"
     (convert-syllab-to-romaji "shi") => "shi"
@@ -297,64 +307,64 @@
   (#'boeki/find-long-vowel-map "shū")
      => {:o "u" :w "uu" :r "ū" :ks "û" :h "う" :k "ー" :kai @#'boeki/kai-u})
 
+(fact "long vowel conversions"
+  ((#'boeki/convert-syllab :katakana) "おう") => "オー"
+  ((#'boeki/convert-syllab :romaji) "おう") => "ō"
+  ((#'boeki/convert-syllab :kunrei-shiki) "おう") => "ô"
+  ((#'boeki/convert-syllab :wapuro) "おう") => "ou"
+
+  ((#'boeki/convert-syllab :katakana) "おお") => "オー"
+  ((#'boeki/convert-syllab :romaji) "おお") => "ō"
+  ((#'boeki/convert-syllab :kunrei-shiki) "おお") => "ô"
+  ((#'boeki/convert-syllab :wapuro) "おお") => "oo"
+
+  ((#'boeki/convert-syllab :hiragana) "ō") => "おう"
+  ((#'boeki/convert-syllab :katakana) "ō") => "オー"
+  ((#'boeki/convert-syllab :kunrei-shiki) "ō") => "ô"
+  ((#'boeki/convert-syllab :wapuro) "ō") => "ou"
+
+  ((#'boeki/convert-syllab :hiragana) "オー") => "おう"
+  ((#'boeki/convert-syllab :romaji) "オー") => "ō"
+  ((#'boeki/convert-syllab :kunrei-shiki) "オー") => "ô"
+  ((#'boeki/convert-syllab :wapuro) "オー") => "ou"
+
+  ((#'boeki/convert-syllab :katakana) "うう") => "ウー"
+  ((#'boeki/convert-syllab :romaji) "うう") => "ū"
+  ((#'boeki/convert-syllab :kunrei-shiki) "うう") => "û"
+  ((#'boeki/convert-syllab :wapuro) "うう") => "uu"
+
+  ((#'boeki/convert-syllab :hiragana) "ウー") => "うう"
+  ((#'boeki/convert-syllab :romaji) "ウー") => "ū"
+  ((#'boeki/convert-syllab :kunrei-shiki) "ウー") => "û"
+  ((#'boeki/convert-syllab :wapuro) "ウー") => "uu"
+
+  ((#'boeki/convert-syllab :hiragana) "ū") => "うう"
+  ((#'boeki/convert-syllab :katakana) "ū") => "ウー"
+  ((#'boeki/convert-syllab :kunrei-shiki) "ū") => "û"
+  ((#'boeki/convert-syllab :wapuro) "ū") => "uu"
+
+  ((#'boeki/convert-syllab :katakana) "ou") => "オー"
+  ((#'boeki/convert-syllab :romaji) "ou") => "ō"
+  ((#'boeki/convert-syllab :kunrei-shiki) "ou") => "ô"
+  ((#'boeki/convert-syllab :hiragana) "ou") => "おう"
+
+  ((#'boeki/convert-syllab :katakana) "oo") => "オー"
+  ((#'boeki/convert-syllab :romaji) "oo") => "ō"
+  ((#'boeki/convert-syllab :kunrei-shiki) "oo") => "ô"
+  ((#'boeki/convert-syllab :hiragana) "oo") => "おお"
+
+  ((#'boeki/convert-syllab :hiragana) "aa") => "ああ")
+
 (fact
-  (#'boeki/long-vowel-syllab "おう" :katakana) => "オー"
-  (#'boeki/long-vowel-syllab "おう" :romaji) => "ō"
-  (#'boeki/long-vowel-syllab "おう" :kunrei-shiki) => "ô"
-  (#'boeki/long-vowel-syllab "おう" :wapuro) => "ou"
-
-  (#'boeki/long-vowel-syllab "おお" :katakana) => "オー"
-  (#'boeki/long-vowel-syllab "おお" :romaji) => "ō"
-  (#'boeki/long-vowel-syllab "おお" :kunrei-shiki) => "ô"
-  (#'boeki/long-vowel-syllab "おお" :wapuro) => "oo"
-
-  (#'boeki/long-vowel-syllab "ō" :hiragana) => "おう"
-  (#'boeki/long-vowel-syllab "ō" :katakana) => "オー"
-  (#'boeki/long-vowel-syllab "ō" :kunrei-shiki) => "ô"
-  (#'boeki/long-vowel-syllab "ō" :wapuro) => "ou"
-
-  (#'boeki/long-vowel-syllab "オー" :hiragana) => "おう"
-  (#'boeki/long-vowel-syllab "オー" :romaji) => "ō"
-  (#'boeki/long-vowel-syllab "オー" :kunrei-shiki) => "ô"
-  (#'boeki/long-vowel-syllab "オー" :wapuro) => "ou"
-
-  (#'boeki/long-vowel-syllab "うう" :katakana) => "ウー"
-  (#'boeki/long-vowel-syllab "うう" :romaji) => "ū"
-  (#'boeki/long-vowel-syllab "うう" :kunrei-shiki) => "û"
-  (#'boeki/long-vowel-syllab "うう" :wapuro) => "uu"
-
-  (#'boeki/long-vowel-syllab "ウー" :hiragana) => "うう"
-  (#'boeki/long-vowel-syllab "ウー" :romaji) => "ū"
-  (#'boeki/long-vowel-syllab "ウー" :kunrei-shiki) => "û"
-  (#'boeki/long-vowel-syllab "ウー" :wapuro) => "uu"
-
-  (#'boeki/long-vowel-syllab "ū" :hiragana) => "うう"
-  (#'boeki/long-vowel-syllab "ū" :katakana) => "ウー"
-  (#'boeki/long-vowel-syllab "ū" :kunrei-shiki) => "û"
-  (#'boeki/long-vowel-syllab "ū" :wapuro) => "uu"
-
-  (#'boeki/long-vowel-syllab "ou" :katakana) => "オー"
-  (#'boeki/long-vowel-syllab "ou" :romaji) => "ō"
-  (#'boeki/long-vowel-syllab "ou" :kunrei-shiki) => "ô"
-  (#'boeki/long-vowel-syllab "ou" :hiragana) => "おう"
-
-  (#'boeki/long-vowel-syllab "oo" :katakana) => "オー"
-  (#'boeki/long-vowel-syllab "oo" :romaji) => "ō"
-  (#'boeki/long-vowel-syllab "oo" :kunrei-shiki) => "ô"
-  (#'boeki/long-vowel-syllab "oo" :hiragana) => "おお"
-
-  (#'boeki/long-vowel-syllab "aa" :hiragana) => "ああ")
-
-(fact
-  (#'boeki/long-vowel-syllab "しょう" :romaji) => "shō"
-  (#'boeki/long-vowel-syllab "チョー" :hiragana) => "ちょう"
-  (#'boeki/long-vowel-syllab "shū" :hiragana) => "しゅう"
-  (#'boeki/long-vowel-syllab "shū" :katakana) => "シュー"
-  (#'boeki/long-vowel-syllab "しゅう" :katakana) => "シュー"
-  (#'boeki/long-vowel-syllab "かあ" :romaji) => "kā"
-  (#'boeki/long-vowel-syllab "しゅう" :romaji) => "shū"
-  (#'boeki/long-vowel-syllab "シュー" :hiragana) => "しゅう"
-  (#'boeki/long-vowel-syllab "シュー" :romaji) => "shū")
+  ((#'boeki/convert-syllab :romaji) "しょう") => "shō"
+  ((#'boeki/convert-syllab :hiragana) "チョー") => "ちょう"
+  ((#'boeki/convert-syllab :hiragana) "shū") => "しゅう"
+  ((#'boeki/convert-syllab :katakana) "shū") => "シュー"
+  ((#'boeki/convert-syllab :katakana) "しゅう") => "シュー"
+  ((#'boeki/convert-syllab :romaji) "かあ") => "kā"
+  ((#'boeki/convert-syllab :romaji) "しゅう") => "shū"
+  ((#'boeki/convert-syllab :hiragana) "シュー") => "しゅう"
+  ((#'boeki/convert-syllab :romaji) "シュー") => "shū")
 
 (fact
   (henkan "ō" :hiragana) => "おう"
@@ -367,7 +377,7 @@
   (henkan "アオエウイあおえうい" :katakana :romaji) => "aoeuiあおえうい"
   (henkan "アオエウイあおえうい" :katakana :hiragana) => "あおえういあおえうい"
   (henkan "abunaidesukarakiroisen no uchigawadeomachikudasai" :hiragana)
-    => "あぶないですからきろいせん　の　うちがわでおまちください")
+    => "あぶないですからきろいせん の うちがわでおまちください")
 
 (fact
   (hiragana "ドーitashimashite") => "どういたしまして"
@@ -388,9 +398,6 @@
 (fact
   (kunrei "shūpatsu") => "syûpatu"
   (kunrei nil) => nil)
-
-(fact
-  (hebon "０１２３４５６７８９") => "0123456789")
 
 (fact
   (let [hiragana-juxt

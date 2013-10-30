@@ -49,17 +49,17 @@ and more.
 In project.clj: `[namban "0.1.3"]`
 
 ### Tatoeba
-
+API is available both in romaji and kana.
 ```clojure
 user=> (use 'namban.boeki)
 nil
 user=> (hiragana? "ねこ")
 true
-user=> (hepburn "このパン")
+user=> (hebon "このパン")
 "konopan"
 user=> (katakana->romaji "このパン")
 "このpan"
-user=> (romaji->hiragana "wareware wa uchūjin desu")
+user=> (ローマじ→ひらがな "wareware wa uchūjin desu")
 "われわれ わ うちゅうじん です" ; no way to know wa is a particle
 user=> (scripts "パソコンが難しいです。")
 #{:katakana :hiragana :kanji}
@@ -70,7 +70,7 @@ To check examples and full API, please consult the source and test suite.
 
 ### Shortcomings
 
-When the target conversion script is hepburn, and [は へ を] are used as
+When the target conversion script is hebon, and [は へ を] are used as
 particles, they will be converted to [ha he wo], instead of the expected [wa e o].
 Romaji long vowel "ō" or "ô" conversion to おお/oo when applicable is not
 supported. Default are おう/ou, as this is the most common case.

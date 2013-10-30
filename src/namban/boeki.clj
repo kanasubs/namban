@@ -3,21 +3,31 @@
   namban.boeki
   (:require
     [clojure.string :refer [split]]
-    [clojure.set :refer [union]]))
+    [clojure.set :refer [union subset?]]))
 
+; TODO support conversion from old versions of hebon and nihon-shiki
 (def ^:private syllab-maps
  (let [m
-    [; TODO complete kutoten
-     ; TODO support conversion from old versions of hebon and nihon-shiki
-     {:k "０" :r "0"} {:k "１" :r "1"} {:k "２" :r "2"} {:k "３" :r "3"}
-     {:k "４" :r "4"} {:k "５" :r "5"} {:k "６" :r "6"}
-     {:k "７" :r "7"} {:k "８" :r "8"} {:k "９" :r "9"}
-     {:k "。" :r "."} {:k "、" :r ","} {:k "？" :r "?"} {:k "！" :r "!"}
-     {:k "　" :r " "} {:h "ゝ" :k "ヽ"} {:h "ゞ" :k "ヾ"}
+    [; TODO complete yakumono
+     {:y "。" :ry "."} {:y "、" :ry ","} {:y "？" :ry "?"} {:y "！" :ry "!"}
+     {:y "　" :ry " "} {:y "ゝ" :ry "ヽ"} {:y "ゞ" :ry "ヾ"} {:y "ー" :ry "-"}
+     {:y "（" :ry "("} {:y "）" :ry ")"} {:y "｛" :ry "{"} {:y "｝" :ry "}"}
+     {:y "［" :ry "["} {:y "］" :ry "]"} {:y "＠" :ry "@"} {:y "・" :ry " "}
+     {:y "＃" :ry "#"} {:y "＄" :ry "$"} {:y "％" :ry "%"} {:y "＆" :ry "&"}
+     {:y "｀" :ry "`"} {:y "：" :ry ":"} {:y "…" :ry "..."} {:y "＊" :ry "*"}
+     {:y "※" :ry "*"} {:y "；" :ry ";"} {:y "￡" :ry "£"}
      
-     {:h "あ" :k "ア" :r "a"} {:h "い" :k "イ" :r "i"} {:h "う" :k "ウ" :r "u"}
-     {:h "え" :k "エ" :r "e"} {:h "お" :k "オ" :r "o"}
-     
+     {:h "あ" :k "ア" :r "a" :s "ａ" :as "a"} {:h "い" :k "イ" :r "i"}
+     {:h "う" :k "ウ" :r "u"} {:h "え" :k "エ" :r "e" :as "e"} {:h "お" :k "オ" :r "o"}
+
+     ; numbers go after {:h "あ" :k "ア" :r "a" :s "ａ" :as "a"}
+　　　{:s "０" :as "0"} {:s "１" :as "1"} {:s "２" :as "2"} {:s "３" :as "3"}
+     {:s "４" :as "4"} {:s "５" :as "5"} {:s "６" :as "6"} {:s "７" :as "7"}
+     {:s "８" :as "8"} {:s "９" :as "9"} {:s "ｂ" :as "b"} {:s "ｃ" :as "c"}
+     {:s "ｄ" :as "d"} {:s "ｅ" :as "e"} {:s "ｆ" :as "f"} {:s "Ａ" :as "A"}
+     {:s "Ｂ" :as "B"} {:s "Ｃ" :as "C"} {:s "Ｄ" :as "D"} {:s "Ｅ" :as "E"}
+     {:s "Ｆ" :as "F"}
+
      ; TODO support wapuro -/nn
      {:h "ん" :k "ン" :r "n'"}
      {:h "ん" :k "ン" :r "n"} ; n => ん/ン
@@ -300,14 +310,19 @@
 (def ^:private agyo (set "あいうえお")) ;TODO ー belongs?
 
 (def ^:private romaji-common (set (str "abcdefghijkmnoprstuvwyz"
-                        "ABCDEFGHIJKMNOPRSTUVWYZ")))
+                                       "ABCDEFGHIJKMNOPRSTUVWYZ")))
 
 (def ^:private hebon-dake (set "ĀāĒēĪīŌōŪū"))
 (def ^:private kunrei-only (set "ÂâÊêÎîÔôÛû"))
 
 (def ^:private kana-sokuon (set "っッ"))
 
-(defn- find-first
+; TODO complete this
+(def ^:private yakumono-symbols
+  (str "！？。（）｛｝［］ーヽヾゝゞっ゛・゜…※＊＠＃＄％＆｀｠￠￡＂｢￢｣"
+       "､･￥￦＇￨￩：￪＋；［｛￫，＜＼｜￬－＝］｝￭．＞＾～ﾞ￮／＿｟ﾟ"))
+
+(defn- ffilter
   "Returns the first item of coll for which (pred item) returns logical true.
    Consumes sequences up to the first match, will consume the entire sequence
    and return nil if no match is found.
@@ -316,7 +331,7 @@
   (first (filter pred coll)))
 
 (defn- long-vowel-syllab?
-  "Checks if string is a long vowel syllab.
+  "Checks if string ifs a long vowel syllab.
    Depends on syllab-chunkify correctness."
   [s]
   (or
@@ -324,11 +339,6 @@
     ((set "ĀāĪīŪūĒēŌōÂâÎîÛûÊêÔô") (last s))
     (= (last s) (-> s butlast last))
     (and (= (-> s butlast last) \o) (= (last s) \u))))
-
-(defn- jp-syllab?
-  "Checks if string is a japanese syllab."
-  [s]
-  (fn [m] (some (fn [[_ v]] (= s v)) m)))
 
 (defn- internal-script-kw
   "Converts a valid user input script keyword to a valid library script keyword."
@@ -396,12 +406,12 @@
         f (insert-pipe f)]
     (join-chunk-patterns f)))
 
+(def ^:private hex-re-pattern "(?:0?x|U\\+)[0-9a-zA-Z]{4}")
+
 ; TODO find in accordance with source script. for cases of duplicate syllab
 ;      but of different scripts why may result in different syllab maps
-(defn- find-jp-syllab [s target]
-  (let [s (str s)
-        t (kw-initials target)]
-    (t (find-first (jp-syllab? s) syllab-maps))))
+(defn- ffilter-syllab [s]
+  (ffilter #(some #{(str s)} (vals %)) syllab-maps))
 
 (defn- str-pred
   "Checks if all character(s) in string have predicate f."
@@ -415,7 +425,6 @@
   "Returns the scripts belonging to the script keyword."
   [kw]
   (case kw
-    :shinboru-to-kutoten [:hiragana :katakana]
     :romaji [:romaji :kunrei-shiki :wapuro]
     [kw]))
 
@@ -438,9 +447,13 @@
   "Checks if all character(s) in string are agyo."
   [s] (str-pred agyo s))
 
+(def あぎょう？ agyo?)
+
 (defn hiragana?
   "Checks if all character(s) in string are hiragana."
   [s] (str-pred hiragana-symbols s))
+
+(def ひらがな？ hiragana?)
 
 (defn hankaku-katakana?
   "Checks if all character(s) in string are hankaku-katakana."
@@ -453,6 +466,8 @@
               (and (<= 0xff61 c) (<= c 0xff9f)))]
         (not (some (comp not f) s))))))
 
+(def はんかくカタカナ？ hankaku-katakana?)
+
 (defn zenkaku-katakana?
   "Checks if all character(s) in string are zenkaku-katakana."
   [s]
@@ -464,49 +479,92 @@
               (and (<= 0x30a0 c) (<= c 0x30ff)))]
         (not (some (comp not f) s))))))
 
+(def ぜんかくカタカナ？ zenkaku-katakana?)
+
 (defn katakana?
   "Checks if all character(s) in string are katakana."
-  [s] (str-pred #(or (zenkaku-katakana? %) (hankaku-katakana? %)) s))
+  [s] (str-pred (some-fn zenkaku-katakana? hankaku-katakana?) s))
+
+(def カタカナ？ katakana?)
 
 (defn kana?
   "Checks if all character(s) in string are kana."
-  [s] (str-pred #(or (katakana? %) (hiragana? %)) s))
+  [s] (str-pred (some-fn katakana? hiragana?) s))
+
+(def かな？ kana?)
 
 (defn kunrei?
   "Checks if all character(s) in string are kunrei-shiki romaji."
-  [s] (str-pred #(or (romaji-common %) (kunrei-only %)) s))
+  [s] (str-pred (some-fn romaji-common kunrei-only) s))
 
 (def kunrei-shiki? kunrei?)
+(def くんれい？ kunrei?)
+(def くんれいしき？ kunrei?)
 
 (defn hebon?
   "Checks if all character(s) in string are hebon romaji."
-  [s] (str-pred #(or (romaji-common %) (hebon-dake %)) s))
+  [s] (str-pred (some-fn romaji-common hebon-dake) s))
+
+(def hebon-shiki? hebon?)
+(def ヘボン？ hebon?)
+(def ヘボンしき？ hebon?)
 
 (defn wapuro?
   "Checks if all character(s) in string are wāpuro romaji."
-  [s] (str-pred #(romaji-common %) s))
+  [s] (str-pred romaji-common s))
+
+(def ワープロ？ wapuro?)
 
 (defn romaji?
   "Checks if all character(s) in string are any kind of romaji."
-  [s] (str-pred #(or (romaji-common %) (hebon-dake %) (kunrei-only %)) s))
+  [s] (str-pred (some-fn romaji-common hebon-dake kunrei-only) s))
 
-(defn shinboru-to-kutoten?
+(def ローマじ？ romaji?)
+
+; TODO complete this
+(defn yakumono?
   "Checks if all character(s) in string are japanese punctuation."
   [s]
   (str-pred
     #(or
+       ; source: http://www.fontspace.com/unicode/block/CJK+Symbols+and+Punctuation
        (and (>= (int %) 0x3000) (<= (int %) 0x303f))
-       (some #{%} "！？"))
+       ; source: http://unicode.org/charts/PDF/UFF00.pdf
+       (some #{%} yakumono-symbols))
     s))
+
+(def ^:private やくもの？ yakumono?)
+
+; TODO complete this
+(defn romaji-yakumono?
+  "Checks if all character(s) in string are romaji punctuation."
+  [s] (str-pred #(some #{%} " .,?!-(){}[]@#$%&`:*;£") s))
+
+(def ローマじやくもの？ romaji-yakumono?)
+
+(defn arabia-suji?
+  "Checks if string is arabian numeral."
+  [s]
+  (re-matches
+    (re-pattern (str hex-re-pattern "|[0-9]"))
+    (str s)))
+
+(def アラビアすうじ？ arabia-suji?)
+
+(defn suji?
+  "Checks if all character(s) in string are arabian numbers."
+  [s] (str-pred #(some #{%} "０１２３４５６７８９ａｂｃｄｅｆＡＢＣＤＥＦ") s))
+
+(def すうじ？ suji?)
 
 (defn some-romaji-sokuon-comp
   "Returs romaji sokuon compound or nil if it doesn't exist in string.
    Compound refers to sokuon followed by 'consonant'"
   [s]
-  (when (romaji? s)
+  (when (and (romaji? s) (not (re-find #"aa|ii|uu|ee|oo" s)))
     (let [=2 (comp (partial = 2) count)]
       (some->> (partition-by identity s)
-               (find-first =2)
+               (ffilter =2)
                first
                (repeat 2)
                (apply str)))))
@@ -514,7 +572,7 @@
 (defn some-sokuon-comp
   "Returs truthy if there is a sokuon compound or falsey otherwise.
    Compound refers to sokuon followed by 'consonant'"
-  [s] (or (some-kana-sokuon-comp s) (some-romaji-sokuon-comp s)))
+  [s] ((some-fn some-kana-sokuon-comp some-romaji-sokuon-comp) s))
 
 (defn- kana-agyo-igai-fns
   "Receives a kana predicate and returns its corresponding consonant fn."
@@ -533,10 +591,12 @@
 (def ^:private chunk-re-pattern
   (re-pattern
     (str
+      hex-re-pattern "|"
       romaji-chunk-re "|"
       katakana-chunk-re "|"
       hiragana-chunk-re "|[\n\b\t\f\r]|.")))
 
+; TODO redesign in terms of [{:type value} ...] no predicate needed - faster, cleaner
 (defn- syllab-chunkify
   "Given a string, returns ordered coll of potential japanese syllabs."
   [s]
@@ -552,21 +612,24 @@
     (hiragana? c) :hiragana
     (kunrei-only c) :kunrei-shiki
     (romaji? c) :romaji
-    (shinboru-to-kutoten? c) :shinboru-to-kutoten
+    (yakumono? c) :yakumono
+    (romaji-yakumono? c) :romaji-yakumono
+    (suji? c) :suji
+    (arabia-suji? c) :arabia-suji
     (when-let [c (some-> c int)]
       (and (>= c 0x4e00) (<= c 0x9faf))) :kanji))
 
 (defn scripts
   "Returns a set of script keywords
    corresponding to every character in input string."
-  [s] (some->> s (map char-jp-script) flatten (into #{})))
+  [s] (some->> s (map char-jp-script) (into #{})))
 
 (defn- internal-scripts
   "Returns a set of internal script keywords
    corresponding to every character in input string."
   [s]
   (let [char-jp-script (comp internal-script-kw char-jp-script)]
-    (some->> s (map char-jp-script) flatten (into #{}))))
+    (some->> s (map char-jp-script) (into #{}))))
 
 (defn- kw-subgroups-of [s]
   (->> (internal-scripts s) (map kw-subgroups) flatten (into #{})))
@@ -590,13 +653,13 @@
       (romaji? s) :romaji)))
 
 (defmethod find-long-vowel-map :kana [s]
-  (let [kai-map (find-first
+  (let [kai-map (ffilter
                  #(some #{(->> s butlast last)} (:kai %))
                  long-vowel-symbols)]
     (cond
       (katakana? s) kai-map
       (hiragana? s)
-        (let [vowel-map (find-first #(some #{(last s)} (:h %)) long-vowel-symbols)]
+        (let [vowel-map (ffilter #(some #{(last s)} (:h %)) long-vowel-symbols)]
           (if (or (= kai-map vowel-map) (not= (:o vowel-map) (:o kai-map)))
             kai-map
             vowel-map)))))
@@ -605,10 +668,10 @@
   (let [lower-vowels? #(every? identity (map (set "aiueo") %))
         upper-vowels? #(every? identity (map (set "AIUEO") %))
         last-vowels (apply str [(-> s butlast last) (last s)])
-        long-vowels (or (lower-vowels? last-vowels) (upper-vowels? last-vowels))
+        long-vowels ((some-fn lower-vowels? upper-vowels?) last-vowels)
         long-vowel? #(some (fn [[_ v]] (= (-> s last str) v)) %)
         long-vowels? #(some (fn [[_ v]] (= last-vowels v)) %)]
-    (find-first (if long-vowels long-vowels? long-vowel?) long-vowel-symbols)))
+    (ffilter (if long-vowels long-vowels? long-vowel?) long-vowel-symbols)))
 
 (defn- sokuon-for
   "Convert source sokuon for target script."
@@ -616,18 +679,34 @@
   (let [t (-> target kw-supergroup kw-initials)]
     (if (= t :r)
       (first
-        (or (find-jp-syllab (last s) :r) s))
+        (or (-> s last ffilter-syllab :r) s))
       (t {:h \っ :k \ッ}))))
 
-(declare convert-syllab)
+;OPTIMIZE in case source already is target, don't make lookup
+(defmulti ^:private convert-syllab
+  "Convert syllab to target script."
+  (fn [target & [s]]
+    (when s
+      (cond
+        (some #{target} #{:katakana :hiragana :kunrei-shiki :romaji :wapuro})
+          (cond
+            (some-sokuon-comp s) :sokuon
+            (long-vowel-syllab? s) :long-vowel
+            :else :vanilla)
+        (= target :suji)
+          (if (arabia-suji? s) :suji :identity)
+        :else :vanilla))))
+;(suji "9aB") => "９あＢ"
+(defmethod convert-syllab :sokuon [target & [s]]
+  (str
+    (sokuon-for (take 2 s) target) ; also takes lookahead char
+    (convert-syllab target (apply str (drop 1 s)))))
 
-(defn- long-vowel-syllab
-  "Convert valid long vowell syllab to target script long vowel syllab."
-  [syllab target]
-  (let [convert-syllab (convert-syllab target :final)
-        long-vowel-map (find-long-vowel-map syllab)
-        cut-syllab (apply str (butlast syllab))]
-    (if (kana? syllab)
+(defmethod convert-syllab :long-vowel [target & [s]]
+  (let [convert-syllab (convert-syllab target)
+        long-vowel-map (find-long-vowel-map s)
+        cut-syllab (apply str (butlast s))]
+    (if (kana? s)
       (apply-long-vowel (convert-syllab cut-syllab) long-vowel-map target)
       (let [vanilla-syllab
               (str cut-syllab
@@ -635,25 +714,21 @@
             converted-syllab (convert-syllab vanilla-syllab)]
         (apply-long-vowel converted-syllab long-vowel-map target)))))
 
-(defmulti ^:private convert-syllab
-  "Convert syllab to target script.
-   :final optional param is used when syllab is vanilla."
-  (fn [_ & [type]] type))
+(defmethod convert-syllab :suji [target & [s]]
+  (let [t (kw-initials target)
+        f #(if (some #{%} #{\U \x}) % (-> % ffilter-syllab t))]
+    (apply str (map f s))))
 
-(defmethod convert-syllab :final [target & [_]]
-  (fn [s] (or (find-jp-syllab s target) s)))
+(defmethod convert-syllab :vanilla [target & [s]]
+  (let [t (kw-initials target)]
+    (or (-> s ffilter-syllab t) s)))
+
+(defmethod convert-syllab :identity [_ & [s]] s)
 
 (defmethod convert-syllab :default [target & [_]]
   (fn [s]
     (let [s (str s)]
-      (if (some-sokuon-comp s)
-        (str
-           (sokuon-for (take 2 s) target) ; also takes lookahead char
-           ((convert-syllab target) (apply str (drop 1 s))))
-        (or
-          (find-jp-syllab s target)
-          (when (long-vowel-syllab? s) (long-vowel-syllab s target))
-          s)))))
+      (convert-syllab target s))))
 
 (defn henkan
   "'henkan' means 'conversion'. Converts a string into target script.
@@ -713,6 +788,28 @@
 
 (def ワープロ wapuro)
 
+(defn romaji-yakumono "Returns romaji punctuation."
+  [s] (henkan s :romaji-yakumono))
+
+(def ローマじやくもの romaji-yakumono)
+
+(defn yakumono
+  [s] (henkan s :yakumono))
+
+(def やくもの yakumono)
+
+(defn suji
+  "Returns japanese numerals."
+  [s] (henkan s :suji))
+
+(def すうじ suji)
+
+(defn arabia-suji
+  "Returns arabic numerals."
+  [s] (henkan s :arabia-suji))
+
+(def アラビアすうじ arabia-suji)
+
 (defn hiragana->zenkaku-katakana
   "Converts syllabs in hiragana to katakana.
    Leaves the rest of the string intact."
@@ -735,7 +832,7 @@
   [s] (henkan s :hiragana :hebon))
 
 (def hiragana->hebon-shiki hiragana->hebon)
-(def ひらがな→ヘボンしき hiragana->hebon)
+(def ひらがな→ヘボン hiragana->hebon)
 (def ひらがな→ヘボンしき hiragana->hebon)
 
 (defn hiragana->kunrei
@@ -961,3 +1058,4 @@
 ;
 ; add ignore wapuro chunking option
 ; create wapuro-syllabs? / hebon-syllabs? / kunrei-syllabs?
+; what category are: "＝" ?
