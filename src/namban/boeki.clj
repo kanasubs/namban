@@ -1,9 +1,7 @@
 (ns ^{:doc "Conversion between japanese language scripts and more."
       :author "Carlos C. Fontes"}
   namban.boeki
-  (:require
-    [clojure.string :refer [split]]
-    [clojure.set :refer [union subset?]]))
+  (:require [clojure.string :refer [split]]))
 
 ; TODO support conversion from old versions of hebon and nihon-shiki
 (def ^:private syllab-maps
@@ -17,6 +15,9 @@
      {:y "｀" :ry "`"} {:y "：" :ry ":"} {:y "…" :ry "..."} {:y "＊" :ry "*"}
      {:y "※" :ry "*"} {:y "；" :ry ";"} {:y "￡" :ry "£"}
      
+     ; this is some kind of yakumono, but can't be included above
+     {:k "ヿ" :h "ゟ" :r " "}
+
      {:h "あ" :k "ア" :r "a" :s "ａ" :as "a"} {:h "い" :k "イ" :r "i"}
      {:h "う" :k "ウ" :r "u"} {:h "え" :k "エ" :r "e" :as "e"} {:h "お" :k "オ" :r "o"}
 
@@ -282,20 +283,20 @@
    {:o "E" :w "EE" :r "Ē" :ks "Ê" :h "え" :k "ー" :kai kai-e}
    {:o "O" :w "OU" :r "Ō" :ks "Ô" :h "う" :k "ー" :kai kai-o}]) ; third
 
-(def ^:private unpaired-katakana "゠ヷヸヹヺ・ーヿ")
-(def ^:private unpaired-hiragana "゙゚゛゜ゟ")
+(def ^:private unpaired-katakana "゠ヷヸヹヺ・ー")
+(def ^:private unpaired-hiragana "゙゚゛゜")
 
 (def ^:private katakana-symbols
   [(str
      "ァィゥェォッャュョアイウエオカガキギクグケゲコゴサザシジスズセゼソゾタダチヂツヅテデトドナニ"
      "ヌネノハバパヒビピフブプヘベペホボポマミムメモヤユヨラリルレロヮワヰヱヲンヴヵヶ")
-  "ヽヾ" unpaired-katakana])
+  "ヽヾヿ" unpaired-katakana])
 
 (def ^:private hiragana-symbols
   (set (str 
     "ぁぃぅぇぉっゃゅょあいうえおかがきぎくぐけげこごさざしじすずせぜそぞただちぢつづてでとどなに"
     "ぬねのはばぱひびぴふぶぷへべぺほぼぽまみむめもやゆよらりるれろゎわゐゑをんゔゕゖ"
-    "ゝゞ" unpaired-hiragana)))
+    "ゝゞゟ" unpaired-hiragana)))
 
 (def ^:private sokuon-after-symbols
   (set (str "かがきぎくぐけげこごさざしじすずせぜそぞただちぢつづてでと"
@@ -455,6 +456,7 @@
 
 (def ひらがな？ hiragana?)
 
+; OPTIMIZE refactor this dedup
 (defn hankaku-katakana?
   "Checks if all character(s) in string are hankaku-katakana."
   [s]
@@ -533,7 +535,7 @@
        (some #{%} yakumono-symbols))
     s))
 
-(def ^:private やくもの？ yakumono?)
+(def やくもの？ yakumono?)
 
 ; TODO complete this
 (defn romaji-yakumono?
@@ -556,6 +558,24 @@
   [s] (str-pred #(some #{%} "０１２３４５６７８９ａｂｃｄｅｆＡＢＣＤＥＦ") s))
 
 (def すうじ？ suji?)
+
+(defn kanji?
+  "Checks if all character(s) in string are kanji.
+   Source: http://en.wikipedia.org/wiki/CJK_Unified_Ideographs"
+  [s]
+  (str-pred
+    #(or ; huh yes there are chinese and korean only here too - what a mess!
+      (and (>= (int %) 0x4e00) (<= (int %) 0x9faf)) ; CJK
+      (and (>= (int %) 0x3400) (<= (int %) 0x4dbf)) ; CJK extension A (rare)
+      (and (>= (int %) 0xf900) (<= (int %) 0xfaff))) ; CJK compat. ideographs
+      ; support for 16 bits only in java and those are off range:
+      ;(and (>= (int %) 0x20000) (<= (int %) 0x2a6d6)) ; CJK ext. B (very rare)
+      ;(and (>= (int %) 0x2a700) (<= (int %) 0x2b73f)) ; CJK ext. C
+      ;(and (>= (int %) 0x2b740) (<= (int %) 0x2b81f)) ; CJK ext. D
+      ;(and (>= (int %) 0x2f800) (<= (int %) 0x2fa1f)) ; CJK supplement
+    s))
+
+(def 漢字？ kanji?)
 
 (defn some-romaji-sokuon-comp
   "Returs romaji sokuon compound or nil if it doesn't exist in string.
@@ -616,8 +636,7 @@
     (romaji-yakumono? c) :romaji-yakumono
     (suji? c) :suji
     (arabia-suji? c) :arabia-suji
-    (when-let [c (some-> c int)]
-      (and (>= c 0x4e00) (<= c 0x9faf))) :kanji))
+    (kanji? c) :kanji))
 
 (defn scripts
   "Returns a set of script keywords

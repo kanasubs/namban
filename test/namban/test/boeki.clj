@@ -160,6 +160,16 @@
   (suji "っと") => "っと"
   (arabia-suji "９ａＢ") => "9aB")
 
+(fact "CJK Unified Ideographs"
+  (kanji? "人") => truthy ; basic
+  (kanji? "㐰") => truthy ; extension A
+  (kanji? "爫") => truthy) ; compatibility
+; support for 16 bits only in java and those are off range:
+;  (kanji? "𠃵") => truthy ; extension B
+; can't test extension C - no fonts installed
+;  (kanji? "𫝆") => truthy ; extension D
+;  (kanji? "杓") => truthy ; compatibility supplement
+
 (fact
   "e" => wapuro?
   \r => wapuro?
@@ -432,3 +442,8 @@
   (kunrei->hiragana "sha") => "しゃ"
 
   (katakana->kunrei nil) => nil)
+
+(fact "ヿ, ゟ, <space>"
+  (hiragana "ヿ") => "ゟ"
+  (katakana "ゟ") => "ヿ"
+  (romaji "ヿゟ") => "  ")
