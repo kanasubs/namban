@@ -46,7 +46,11 @@ and more.
 
 ### Install
 
+<<<<<<< HEAD
 In project.clj: `[namban "0.1.3"]`
+=======
+In project.clj: `[namban "0.1.5"]`
+>>>>>>> 95ad7da... bumped version
 
 ### Tatoeba
 <<<<<<< HEAD
@@ -93,7 +97,7 @@ words. This will change in future releases.
 
 ## Notes
 
-Tools like MeCab segment text which can improve namban's accuracy.
+Tools like kuromoji segment text which can improve namban's accuracy.
 
 ## Missing something?
 
