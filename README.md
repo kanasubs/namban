@@ -41,16 +41,19 @@ the edge and by blowing on it.”
 > (Marcouin, Francis and Keiko Omoto. Quand le Japon s’ouvrit au monde. Paris:
 Découvertes Gallimard, 1990. ISBN 2-07-053118-X. Pages 114–116)
 
-namban is a clojure library for conversion between hiragana, katakana, romaji
-and more.
+namban is a clojure library for conversion between hiragana, katakana, romaji and more.
 
 ### Install
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 In project.clj: `[namban "0.1.3"]`
 =======
 In project.clj: `[namban "0.1.5"]`
 >>>>>>> 95ad7da... bumped version
+=======
+[![clojars version](https://clojars.org/namban/latest-version.svg?raw=true)](https://clojars.org/namban)
+>>>>>>> 5e4778e... Update README.md
 
 ### Tatoeba
 <<<<<<< HEAD
@@ -74,7 +77,10 @@ user=> (scripts "パソコンが難しいです。")
 user=> (henkan "shuupatsu" :wapuro :kunrei)
 "shūpatsu"
 ```
-To check examples and full API, please consult the source and test suite.
+
+### Documentation
+
+Consult the [tests](test/namban/test/boeki.clj) or [full API](http://ccfontes.github.io/namban/namban.boeki.html).
 
 ### Shortcomings
 
@@ -85,7 +91,7 @@ supported. Default are おう/ou, as this is the most common case.
 All occurences of ん/ン will be converted to romaji n' regardless of its position in
 words. This will change in future releases.
 
-## TODO
+### TODO
 
 - support kana->X
 - support katakana/romaji-upper-case and hiragana/romaji-lower-case
@@ -95,19 +101,19 @@ words. This will change in future releases.
 - clojurescript support
 - clojure-py support
 
-## Notes
+### Notes
 
 Tools like kuromoji segment text which can improve namban's accuracy.
 
-## Missing something?
+### Missing something?
 
 Feature requests and tips are welcome!
 
-## Japanese language Q&A by
+### Japanese language Q&A by
 
 Megumi Imai
 
-## License
+### License
 
 Copyright (C) 2013 Carlos C. Fontes.
 
