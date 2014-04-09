@@ -1,4 +1,4 @@
-# namban
+# namban [![Build Status](https://travis-ci.org/ccfontes/namban.png?branch=master)](https://travis-ci.org/ccfontes/namban) [![Dependency Status](https://www.versioneye.com/user/projects/5338a8257bae4bff0f000dd6/badge.png)](https://www.versioneye.com/user/projects/5338a8257bae4bff0f000dd6)
 
 During the Nanban Trade Period (Nanban Boeki Jidai), western vocabulary was
 first introduced in the japanese language as a consequence of the interaction
@@ -109,6 +109,10 @@ Tools like kuromoji segment text which can improve namban's accuracy.
 
 Feature requests and tips are welcome!
 
+### Who is using namban?
+
+[kanasubs.com](http://www.kanasubs.com) — Convert subtitles in Kanji/Raw to Kana online.
+
 ### Japanese language Q&A by
 
 Megumi Imai
@@ -119,7 +123,4 @@ Copyright (C) 2013 Carlos C. Fontes.
 
 Double licensed under the [Eclipse Public License](http://www.eclipse.org/legal/epl-v10.html) (the same as Clojure) or
 the [Apache Public License 2.0](http://www.apache.org/licenses/LICENSE-2.0.html).
-
-
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/ccfontes/namban/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
 
