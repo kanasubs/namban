@@ -1,8 +1,8 @@
-# namban [![Build Status](https://travis-ci.org/ccfontes/namban.png?branch=master)](https://travis-ci.org/ccfontes/namban) [![Dependency Status](https://www.versioneye.com/user/projects/5338a8257bae4bff0f000dd6/badge.png)](https://www.versioneye.com/user/projects/5338a8257bae4bff0f000dd6)
+# namban [![Build Status](https://travis-ci.org/ccfontes/namban.png?branch=master)](https://travis-ci.org/ccfontes/namban)
 
 During the Nanban Trade Period (Nanban Boeki Jidai), western vocabulary was
-first introduced in the japanese language as a consequence of the interaction
-between europeans and the japanese people.
+first introduced in the Japanese language as a result of the interaction
+between Europeans and the Japanese people.
 
 <img src="http://upload.wikimedia.org/wikipedia/commons/0/00/NanbanCarrack.jpg"
 <<<<<<< HEAD
@@ -25,7 +25,7 @@ between europeans and the japanese people.
 
 > "They eat with their fingers instead of with chopsticks such as we use. They
 show their feelings without any self-control. They cannot understand the meaning
-of written characters"
+of written characters."
 (from Boxer, Christian Century).
 
 <img src="http://upload.wikimedia.org/wikipedia/commons/b/b4/Hasekura_in_Rome.JPG"
@@ -38,10 +38,9 @@ ground after usage, and they were delighted to see our people around them
 precipitate themselves to pick them up.” 
 > “Their swords cut so well that they can cut a soft paper just by putting it on
 the edge and by blowing on it.”
-> (Marcouin, Francis and Keiko Omoto. Quand le Japon s’ouvrit au monde. Paris:
-Découvertes Gallimard, 1990. ISBN 2-07-053118-X. Pages 114–116)
+> (Marcouin, Francis and Keiko Omoto. Quand le Japon s’ouvrit au monde.)
 
-namban is a clojure library for conversion between hiragana, katakana, romaji and more.
+namban is a Clojure(Script) Japanese library for trading between Hiragana, Katakana, Romaji, for identifying script types and more.
 
 ### Install
 
@@ -57,59 +56,61 @@ In project.clj: `[namban "0.1.5"]`
 
 ### Tatoeba
 <<<<<<< HEAD
+<<<<<<< HEAD
 API is available both in romaji and kana.
 =======
 API is available both in romaji and kana:
 >>>>>>> b965677... updated README.md with kana example and minor fixes
+=======
+API is available both in Romaji and Kana.
+>>>>>>> e991ed9... update to README to reflect 0.2.0 release
 ```clojure
 user=> (use 'namban.boeki)
 nil
 user=> (hiragana? "ねこ")
 true
-user=> (hebon "このパン")
+user=> (hebon "このパン") ; use tools like Kuromoji to segment the text
 "konopan"
 user=> (katakana->romaji "このパン")
 "このpan"
-user=> (ローマじ→ひらがな "wareware wa uchūjin desu")
+user=> (ローマじ->ひらがな "wareware wa uchūjin desu")
 "われわれ わ うちゅうじん です" ; no way to know wa is a particle
 user=> (scripts "パソコンが難しいです。")
 #{:katakana :hiragana :kanji}
-user=> (henkan "shuupatsu" :wapuro :kunrei)
-"shūpatsu"
+user=> (henkan "shūpatsu" :romaji :kunrei)
+"syûpatu"
 ```
 
-### Documentation
+### Tests and full API
 
-Consult the [tests](test/namban/test/boeki.clj) or [full API](http://ccfontes.github.io/namban/namban.boeki.html).
+[![](http://bks4.books.google.com/books?id=GB8YAAAAYAAJ&pg=PA1&img=1&zoom=1&sig=ACfU3U3D9xbQ0qUfE9twRVILvEuPm1vskQ)](http://ccfontes.github.io/namban/namban.boeki.html)
 
 ### Shortcomings
 
-When the target conversion script is hebon, and [は へ を] are used as
-particles, they will be converted to [ha he wo], instead of the expected [wa e o].
-Romaji long vowel "ō" or "ô" conversion to おお/oo when applicable is not
-supported. Default are おう/ou, as this is the most common case.
-All occurences of ん/ン will be converted to romaji n' regardless of its position in
-words. This will change in future releases.
+When the target conversion script is `:hebon`, and `は`, `へ`, `を` are used as
+particles, they will be converted to `ha`, `he`, `wo`, instead of the expected `wa` `e` `o`, respectively.
+Romaji long vowels `ō`, `ô` conversions to `おお`, `oo`, respectively, when applicable is not supported. Defaults are `おう`, `ou` - as this is the most common case.
+All occurrences of `ん`, `ン` will be converted to romaji `n'` regardless of their position in words, although this behaviour will be improved in future releases.
 
-### TODO
+### Improving conversions
 
-- support kana->X
-- support katakana/romaji-upper-case and hiragana/romaji-lower-case
-- support hankaku-katanana
-- support hyōjun-shiki
+Tools like [Kuromoji](http://www.atilika.org) segment text which can improve namban's accuracy.
+
+### Wishlist
+
+- kana->X conversions
+- katakana/romaji-upper-case and hiragana/romaji-lower-case formats
+- support hankaku-katanana script
+- support hyōjun-shiki script
 - consonant expansion
-- clojurescript support
-- clojure-py support
-
-### Notes
-
-Tools like kuromoji segment text which can improve namban's accuracy.
 
 ### Missing something?
 
 Feature requests and tips are welcome!
 
-### Who is using namban?
+### Using namban?
+
+I'll be happy to add your project using namban to this list.
 
 [kanasubs.com](http://www.kanasubs.com) — Convert subtitles in Kanji/Raw to Kana online.
 
@@ -123,4 +124,3 @@ Copyright (C) 2013 Carlos C. Fontes.
 
 Double licensed under the [Eclipse Public License](http://www.eclipse.org/legal/epl-v10.html) (the same as Clojure) or
 the [Apache Public License 2.0](http://www.apache.org/licenses/LICENSE-2.0.html).
-
