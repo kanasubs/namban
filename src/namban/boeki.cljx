@@ -1,5 +1,5 @@
-(ns ;^{:doc "Conversion between japanese language scripts and more."
-    ;  :author "Carlos C. Fontes"}
+(ns ; ^{:doc "Conversion between japanese language scripts and identification of script types."
+    ;   :author "Carlos C. Fontes"}
   namban.boeki
 #+cljs (:require-macros [namban.cljs-macros :refer [defcljx]])
        (:require [clojure.string :refer [split]]

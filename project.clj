@@ -1,16 +1,13 @@
 (defproject namban "0.2.0"
-  :description "Convert text between different japanese scripts."
-
+  :description "Clojure(Script) Japanese library for trading between Hiragana, Katakana, Romaji, for identifying script types and more."
   :dependencies [[org.clojure/clojure "1.5.1"]]
-
-  :profiles {:dev {:dependencies [[org.clojure/clojurescript "0.0-2202"]
-;                                  [ccfontes/cljs-info "1.0.0-SNAPSHOT"]
+  :profiles {:dev {:dependencies [[org.clojure/clojurescript "0.0-2014"]
                                   [org.clojure/tools.namespace "0.2.4"]]
-                   :plugins [[com.keminglabs/cljx "0.3.3-SNAPSHOT"]
-                             [codox "0.6.7"]
+                   :plugins [[com.keminglabs/cljx "0.3.2"]
+                             [ccfontes/codox "0.6.7-SNAPSHOT"]
                              [com.cemerick/clojurescript.test "0.3.0"]
-                             [lein-cljsbuild "1.0.3"]
-                             [com.cemerick/austin "0.1.4"]]}}
+                             [lein-cljsbuild "1.0.0"]
+                             [com.cemerick/austin "0.1.3"]]}}
 
   :repl-options
     {:welcome (do (println "To start Austin, type: (cemerick.piggieback/cljs-repl :repl-env (cemerick.austin/exec-env))")
@@ -35,9 +32,11 @@
             :output-path "target/gen-test"
             :rules :cljs}]}
 
-  :codox {:sources ["target/gen-src" "target/gen-test"]
+  :codox {:src-dir-uri "https://github.com/ccfontes/namban/blob/master/"
+          :sources ["target/gen-src" "target/gen-test"]
+          :src-uri-mapping {"target/gen-src" #(str "src/" % "x")
+                            "target/gen-test" #(str "test/" % "x")}
           :include [namban.boeki namban.test.boeki]
-          :src-dir-uri "https://github.com/ccfontes/namban/tree/master/"
           :src-linenum-anchor-prefix "L"}
 
   :jar-exclusions [#"\.cljx|\.swp|\.swo|\.DS_Store"]

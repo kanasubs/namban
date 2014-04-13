@@ -1,4 +1,5 @@
-(ns namban.test.boeki
+(ns ; ^{:author "Carlos C. Fontes"}
+  namban.test.boeki
 #+cljs (:require-macros [cemerick.cljs.test :refer [is deftest]])
   (:require
        [namban.boeki :as boeki]
