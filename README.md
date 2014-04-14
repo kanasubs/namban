@@ -5,23 +5,7 @@ first introduced in the Japanese language as a result of the interaction
 between Europeans and the Japanese people.
 
 <img src="http://upload.wikimedia.org/wikipedia/commons/0/00/NanbanCarrack.jpg"
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
  alt="Namban Carrack" title="Namban Carrack" align="right" height=65 />
-=======
- alt="Namban Carrack" title="Namban Carrack" align="right" height=85 />
->>>>>>> 3e8ace6... Update README.md
-=======
- alt="Namban Carrack" title="Namban Carrack" align="right" height=60 />
->>>>>>> ae4f0cd... Update README.md
-=======
- alt="Namban Carrack" title="Namban Carrack" align="right" height=70 />
->>>>>>> 5d4bff0... Update README.md
-=======
- alt="Namban Carrack" title="Namban Carrack" align="right" height=65 />
->>>>>>> b00a192... Update README.md
 
 > "They eat with their fingers instead of with chopsticks such as we use. They
 show their feelings without any self-control. They cannot understand the meaning
@@ -44,26 +28,10 @@ namban is a Clojure(Script) Japanese library for trading between Hiragana, Katak
 
 ### Install
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-In project.clj: `[namban "0.1.3"]`
-=======
-In project.clj: `[namban "0.1.5"]`
->>>>>>> 95ad7da... bumped version
-=======
 [![clojars version](https://clojars.org/namban/latest-version.svg?raw=true)](https://clojars.org/namban)
->>>>>>> 5e4778e... Update README.md
 
 ### Tatoeba
-<<<<<<< HEAD
-<<<<<<< HEAD
-API is available both in romaji and kana.
-=======
-API is available both in romaji and kana:
->>>>>>> b965677... updated README.md with kana example and minor fixes
-=======
 API is available both in Romaji and Kana.
->>>>>>> e991ed9... update to README to reflect 0.2.0 release
 ```clojure
 user=> (use 'namban.boeki)
 nil
@@ -77,7 +45,7 @@ user=> (ローマじ->ひらがな "wareware wa uchūjin desu")
 "われわれ わ うちゅうじん です" ; no way to know wa is a particle
 user=> (scripts "パソコンが難しいです。")
 #{:katakana :hiragana :kanji}
-user=> (henkan "shūpatsu" :romaji :kunrei)
+user=> (henkan "shūpatsu" :wapuro :kunrei)
 "syûpatu"
 ```
 
