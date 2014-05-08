@@ -1,4 +1,6 @@
-(ns namban.test.kori
+(ns #+clj ^{:author "Carlos C. Fontes"} namban.test.kori
+   #+cljs namban.test.kori
+   
 #+cljs (:require-macros [cemerick.cljs.test :refer [is deftest]])
        (:require [namban.kori :refer [ffilter charcode]]
           #+cljs [cemerick.cljs.test :as t]

@@ -1,16 +1,16 @@
-(defproject namban "0.2.0"
+(defproject namban "0.2.1"
   :description "Clojure(Script) Japanese library for trading between Hiragana, Katakana, Romaji, for identifying script types and more."
   :dependencies [[org.clojure/clojure "1.5.1"]]
   :profiles {:dev {:dependencies [[org.clojure/clojurescript "0.0-2014"]
                                   [org.clojure/tools.namespace "0.2.4"]]
                    :plugins [[com.keminglabs/cljx "0.3.2"]
-                             [ccfontes/codox "0.6.7-SNAPSHOT"]
+                             [codox "0.8.0"]
                              [com.cemerick/clojurescript.test "0.3.0"]
                              [lein-cljsbuild "1.0.0"]
                              [com.cemerick/austin "0.1.3"]]}}
 
   :repl-options
-    {:welcome (do (println "To start Austin, type: (cemerick.piggieback/cljs-repl :repl-env (cemerick.austin/exec-env))")
+    {:welcome (do (println "To start Austin, type: (cemerick.piggieback/cljs-repl :repl-env (cemerick.austin/exec-env)). Once in the cljs REPL, you must use/require like, e.g.: (ns cljs.user (:use namban.boeki)).")
                   (println "Type (refresh) to reload all namespaces."))
      :timeout 400000
      :init (require '[clojure.tools.namespace.repl :refer [refresh]])}
@@ -34,15 +34,16 @@
 
   :codox {:src-dir-uri "https://github.com/ccfontes/namban/blob/master/"
           :sources ["target/gen-src" "target/gen-test"]
-          :src-uri-mapping {"target/gen-src" #(str "src/" % "x")
-                            "target/gen-test" #(str "test/" % "x")}
+          :src-uri-mapping {#"target/gen-src" #(str "src/" % "x")
+                            #"target/gen-test" #(str "test/" % "x")}
           :include [namban.boeki namban.test.boeki]
           :src-linenum-anchor-prefix "L"}
 
   :jar-exclusions [#"\.cljx|\.swp|\.swo|\.DS_Store"]
 
   :aliases {"test" ["do" ["cljx" "once"] ["cljsbuild" "once"]
-                         "test" ["cljsbuild" "test"]]}
+                         "test" ["cljsbuild" "test"]]
+            "repl" ["do" ["cljsbuild" "clean"] ["cljx" "once"] "repl"]}
 
   :source-paths ["src" "target/gen-src"]
   :test-paths ["target/gen-test"]

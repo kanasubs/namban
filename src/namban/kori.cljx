@@ -1,5 +1,5 @@
-(ns ; ^{:doc "Utility functions and macros."}
-  namban.kori)
+(ns #+clj ^{:doc "Utility functions and macros."} namban.kori
+   #+cljs namban.kori)
 
 (defn cljs?
   "Determines if the file is running in a ClojureScript or Clojure context."

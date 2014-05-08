@@ -1,4 +1,6 @@
-(ns namban.test.shocho
+(ns #+clj ^{:author "Carlos C. Fontes"} namban.test.shocho
+   #+cljs namban.test.shocho
+   
 #+cljs (:require-macros [cemerick.cljs.test :refer [is deftest]])
        (:require [namban.shocho :as shocho]
                  [namban.shocho :refer

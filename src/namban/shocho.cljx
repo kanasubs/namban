@@ -1,5 +1,5 @@
-(ns ; ^{:doc "Language symbols."}
-  namban.shocho)
+(ns #+clj ^{:doc "Language symbols."} namban.shocho
+   #+cljs namban.shocho)
 
 ; TODO support conversion from old versions of hebon and nihon-shiki
 (def syllab-maps
