@@ -32,21 +32,21 @@ namban is a Clojure(Script) Japanese library for trading between Hiragana, Katak
 
 ### Tatoeba
 API is available both in Romaji and Kana.
-```clojure
+```clj
 user=> (use 'namban.boeki)
 nil
-user=> (hiragana? "ねこ")
+user=> (hiragana? "ねこがかわいいでしょう")
 true
-user=> (hebon "このパン") ; use tools like Kuromoji to segment the text
-"konopan"
-user=> (katakana->romaji "このパン")
-"このpan"
+user=> (hebon "このパンがおいしい") ; use tools like Kuromoji to segment the text
+"konopan'gaoishii"
+user=> (katakana->romaji "このパンがおいしい")
+"このpan'がおいしい"
 user=> (ローマじ->ひらがな "wareware wa uchūjin desu")
 "われわれ わ うちゅうじん です" ; no way to know wa is a particle
-user=> (scripts "パソコンが難しいです。")
-#{:katakana :hiragana :kanji}
-user=> (henkan "shūpatsu" :wapuro :kunrei)
-"syûpatu"
+user=> (scripts "こいつぁなあ、南蛮渡来の品もんだぜぇ！")
+#{:kanji :yakumono :hiragana}
+user=> (henkan "nihon e syûpatu" :wapuro :kunrei)
+"nihon e syûpatu"
 ```
 
 ### Tests and full API
@@ -74,7 +74,7 @@ Tools like [Kuromoji](http://www.atilika.org) segment text which can improve nam
 
 ### Missing something?
 
-Feature requests and tips are welcome!
+Feature requests are welcome!
 
 ### Using namban?
 
