@@ -110,7 +110,7 @@
   [f s]
   (when s
     (if (string? s)
-      (not-any? (comp not f) s)
+      (if-not (empty? s) (not-any? (comp not f) s))
       (f s))))
 
 (defmulti ^:private str-in-range-pred

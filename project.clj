@@ -1,4 +1,4 @@
-(defproject namban "0.2.1"
+(defproject namban "0.2.2"
   :description "Clojure(Script) Japanese library for trading between Hiragana, Katakana, Romaji, for identifying script types and more."
   :dependencies [[org.clojure/clojure "1.5.1"]]
   :profiles {:dev {:dependencies [[org.clojure/clojurescript "0.0-2014"]
@@ -43,7 +43,7 @@
 
   :aliases {"test" ["do" ["cljx" "once"] ["cljsbuild" "once"]
                          "test" ["cljsbuild" "test"]]
-            "repl" ["do" ["cljsbuild" "clean"] ["cljx" "once"] "repl"]}
+            "repl" ["do" ["cljx" "once"] "repl"]}
 
   :source-paths ["src" "target/gen-src"]
   :test-paths ["target/gen-test"]

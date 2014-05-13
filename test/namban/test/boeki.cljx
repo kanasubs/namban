@@ -7,7 +7,7 @@
        [namban.shocho :as shocho]
        [namban.boeki :refer
          [some-sokuon-comp some-romaji-sokuon-comp some-kana-sokuon-comp
-          hiragana hiragana? kana? kanji? scripts henkan
+          hiragana hiragana? kana? kanji? 漢字? scripts henkan
           hankaku-katakana? zenkaku-katakana? katakana katakana?
           kunrei kunrei? hebon? romaji romaji? wapuro?
           yakumono? yakumono romaji-yakumono? romaji-yakumono
@@ -254,6 +254,9 @@
   (is (= ((var boeki/char-jp-script) \ア) :zenkaku-katakana))
   (is (nil? ((var boeki/char-jp-script) \q)))
   (is (nil? ((var boeki/char-jp-script) nil))))
+
+(deftest str-pred-empty-test
+  (is (-> "" 漢字? not)))
 
 (deftest kw-subgroups-of-test
   (is (= ((var boeki/kw-subgroups-of) "どうしたの？") #{:hiragana :yakumono})))
