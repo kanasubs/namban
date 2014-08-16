@@ -8,7 +8,7 @@
                     hiragana-symbols consonants vowels agyo
                     sokuon-after-symbols romaji-common hebon-dake kunrei-dake
                     kana-sokuon]]
-          #+cljs [namban.kori :refer [var]]
+          #+cljs [namban.jitsuyo :refer [var]]
           #+cljs [cemerick.cljs.test :as t]
            #+clj [clojure.test :refer [is deftest]]))
 

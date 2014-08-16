@@ -1,8 +1,8 @@
-(ns #+clj ^{:author "Carlos C. Fontes"} namban.test.kori
-   #+cljs namban.test.kori
+(ns #+clj ^{:author "Carlos C. Fontes"} namban.test.jitsuyo
+   #+cljs namban.test.jitsuyo
    
 #+cljs (:require-macros [cemerick.cljs.test :refer [is deftest]])
-       (:require [namban.kori :refer [ffilter charcode]]
+       (:require [namban.jitsuyo :refer [ffilter charcode]]
           #+cljs [cemerick.cljs.test :as t]
            #+clj [clojure.test :refer [is deftest]]))
 

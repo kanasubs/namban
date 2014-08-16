@@ -19,7 +19,7 @@
           romaji->wapuro hebon->hiragana hebon->katakana hebon->romaji
           hebon->kunrei hebon->wapuro kunrei->hiragana kunrei->katakana
           kunrei->romaji kunrei->hebon kunrei->wapuro kunrei->hiragana]]
-#+cljs [namban.kori :refer [var]]
+#+cljs [namban.jitsuyo :refer [var]]
 #+cljs [cemerick.cljs.test :as t] ; or else cemerick no where to be found :D
  #+clj [clojure.test :refer [is deftest]]))
 

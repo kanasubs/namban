@@ -1,8 +1,5 @@
 (ns ^{:doc "Both clojure and clojurescript macros must be implemented in clojure."}
   namban.cljs-macros
-  (:require [namban.kori :refer [cljs?]]
-            ;[cljs-info.ns :refer [cljs-ns-resolve]]
-            ))
+  (:require [namban.jitsuyo :refer [cljs?]]))
 
-(defmacro defcljx [lvalue rvalue]
-  `(def ~lvalue ~rvalue))
+(defmacro defcljx [lvalue rvalue] `(def ~lvalue ~rvalue))

@@ -6,7 +6,7 @@
 
 #+cljs (:require-macros [namban.cljs-macros :refer [defcljx]])
        (:require [clojure.string :refer [split]]
-                 [namban.kori :refer [ffilter charcode]]
+                 [namban.jitsuyo :refer [ffilter charcode]]
                  [namban.shocho :refer [syllab-maps
                                         long-vowel-symbols
                                         katakana-symbols
@@ -24,13 +24,12 @@
 
 (defn- long-vowel-syllab?
   "Checks if string ifs a long vowel syllab.
-   Depends on syllab-chunkify correctness."
+  Depends on syllab-chunkify correctness."
   [s]
-  (or
-    (and (> (count s) 1) ((set "あいうえおー") (last s)))
-    ((set "ĀāĪīŪūĒēŌōÂâÎîÛûÊêÔô") (last s))
-    (= (last s) (-> s butlast last))
-    (and (= (-> s butlast last) \o) (= (last s) \u))))
+  (or (and (> (count s) 1) ((set "あいうえおー") (last s)))
+      ((set "ĀāĪīŪūĒēŌōÂâÎîÛûÊêÔô") (last s))
+      (= (last s) (-> s butlast last))
+      (and (= (-> s butlast last) \o) (= (last s) \u))))
 
 (defn- internal-script-kw
   "Converts a valid user input script keyword to a valid library script keyword."
@@ -43,14 +42,15 @@
 
 (defn- kw-initials
   "Shorten keyword to its initial(s).
-   For every dash character, the following character is an initial too."
+  For every dash character, the following character is an initial too."
   [f]
   (when f
     (->> (split (name f) #"-") (map first) (apply str) keyword)))
 
-(defn- kw-supergroup [t]
+(defn- kw-supergroup
   "Converts the child script keyword to
-   the parent script keyword it belongs to."
+  the parent script keyword it belongs to."
+  [t]
   (case t
     :kunrei-shiki :romaji
     :wapuro :romaji
@@ -65,13 +65,12 @@
   "Join into one string all japanese syllab
    chunk regex patterns for input function."
   [f]
-  (subs
-    (apply str (map f long-vowel-symbols))
-    1))
+  (subs (apply str (map f long-vowel-symbols))
+        1))
 
 (defn- kana-chunk-re
   "Receives a kana consonant fn and
-   returns its full kana regex pattern string."
+  returns its full kana regex pattern string."
   [kai-f k]
   (let [small-w-vowel
           (if (= k :h)
@@ -103,7 +102,8 @@
 ; TODO find in accordance with source script. for cases of duplicate syllab
 ;      but of different scripts why may result in different syllab maps
 (defn- ffilter-syllab [s]
-  (ffilter #(some #{(str s)} (vals %)) syllab-maps))
+  (ffilter #(some #{(str s)} (vals %))
+           syllab-maps))
 
 (defn- str-pred
   "Checks if all characters in string have predicate f."
@@ -223,11 +223,10 @@
   "Checks if all character(s) in string are japanese punctuation."
   [s]
   (str-pred
-    #(or
-       ; source: http://www.fontspace.com/unicode/block/CJK+Symbols+and+Punctuation
-       (<= 0x3000 (charcode %) 0x303f)
-       ; source: http://unicode.org/charts/PDF/UFF00.pdf
-       (some #{%} yakumono-symbols))
+    #(or ; source: http://www.fontspace.com/unicode/block/CJK+Symbols+and+Punctuation
+         (<= 0x3000 (charcode %) 0x303f)
+         ; source: http://unicode.org/charts/PDF/UFF00.pdf
+         (some #{%} yakumono-symbols))
     s))
 
 (defcljx やくもの? yakumono?)
@@ -337,12 +336,12 @@
 
 (defn scripts
   "Returns a set of script keywords
-   corresponding to every character in input string."
+  corresponding to every character in input string."
   [s] (some->> s (map char-jp-script) (into #{})))
 
 (defn- internal-scripts
   "Returns a set of internal script keywords
-   corresponding to every character in input string."
+  corresponding to every character in input string."
   [s]
   (let [char-jp-script (comp internal-script-kw char-jp-script)]
     (some->> s (map char-jp-script) (into #{}))))
@@ -352,7 +351,7 @@
 
 (defn- apply-long-vowel
   "Applies target long vowel supplied in long-vowel-map to a vanilla syllab.
-   Target long vowel is calculated or supplied as param."
+  Target long vowel is calculated or supplied as param."
   [syllab long-vowel-map & [target]]
   (let [target-long-vowel
           (-> (or target (-> syllab internal-scripts first))
@@ -452,7 +451,7 @@
 
 (defn henkan
   "'henkan' means 'conversion'. Converts a string into target script.
-   Converts only syllabs from source script when it's supplied."
+  Converts only syllabs from source script when it's supplied."
   ([s target]
    (let [target (internal-script-kw target)
          convert-syllab (convert-syllab target)]
@@ -467,43 +466,50 @@
 
 (defcljx へんかん henkan)
 
-(defn hiragana "Converts syllabs of string to hiragana."
+(defn hiragana
+  "Converts syllabs of string to hiragana."
   [s] (henkan s :hiragana))
 
 (defcljx ひらがな hiragana)
 
-(defn zenkaku-katakana "Converts syllabs of string to zenkaku katakana."
+(defn zenkaku-katakana
+  "Converts syllabs of string to zenkaku katakana."
   [s] (henkan s :katakana))
 
 (defcljx katakana zenkaku-katakana)
 (defcljx カタカナ zenkaku-katakana)
 (defcljx ゼンカクカタカナ zenkaku-katakana)
 
-(defn romaji "Converts syllabs of string to romaji."
+(defn romaji
+  "Converts syllabs of string to romaji."
   [s] (henkan s :romaji))
 
 (defcljx ローマじ romaji)
 
-(defn hebon "Converts syllabs of string to hebon."
+(defn hebon
+  "Converts syllabs of string to hebon."
   [s] (henkan s :hebon))
 
 (defcljx hebon-shiki hebon)
 (defcljx ヘボン hebon)
 (defcljx ヘボンしき hebon)
 
-(defn kunrei "Converts syllabs of string to kunrei."
+(defn kunrei
+  "Converts syllabs of string to kunrei."
   [s] (henkan s :kunrei-shiki))
 
 (defcljx kunrei-shiki kunrei)
 (defcljx くんれい kunrei)
 (defcljx くんれいしき kunrei)
 
-(defn wapuro "Converts syllabs of string to wāpuro."
+(defn wapuro
+  "Converts syllabs of string to wāpuro."
   [s] (henkan s :wapuro))
 
 (defcljx ワープロ wapuro)
 
-(defn romaji-yakumono "Returns punctuation in romaji."
+(defn romaji-yakumono
+  "Returns punctuation in romaji."
   [s] (henkan s :romaji-yakumono))
 
 (defcljx ローマじやくもの romaji-yakumono)
@@ -528,7 +534,7 @@
 
 (defn hiragana->zenkaku-katakana
   "Converts syllabs in hiragana to katakana.
-   Leaves the rest of the string intact."
+  Leaves the rest of the string intact."
   [s] (henkan s :hiragana :katakana))
 
 (defcljx hiragana->katakana hiragana->zenkaku-katakana)
@@ -537,14 +543,14 @@
 
 (defn hiragana->romaji
   "Converts syllabs in hiragana to romaji.
-   Leaves the rest of the string intact."
+  Leaves the rest of the string intact."
   [s] (henkan s :hiragana :romaji))
 
 (defcljx ひらがな->ローマじ hiragana->romaji)
 
 (defn hiragana->hebon
   "Converts syllabs in hiragana to hebon.
-   Leaves the rest of the string intact."
+  Leaves the rest of the string intact."
   [s] (henkan s :hiragana :hebon))
 
 (defcljx hiragana->hebon-shiki hiragana->hebon)
@@ -553,7 +559,7 @@
 
 (defn hiragana->kunrei
   "Converts syllabs in hiragana to kunrei.
-   Leaves the rest of the string intact."
+  Leaves the rest of the string intact."
   [s] (henkan s :hiragana :kunrei-shiki))
 
 (defcljx hiragana->kunrei-shiki hiragana->kunrei)
@@ -562,14 +568,14 @@
 
 (defn hiragana->wapuro
   "Converts syllabs in hiragana to wāpuro.
-   Leaves the rest of the string intact."
+  Leaves the rest of the string intact."
   [s] (henkan s :hiragana :wapuro))
 
 (defcljx ひらがな->ワープロ hiragana->wapuro)
 
 (defn zenkaku-katakana->hiragana
   "Converts syllabs in katakana to hiragana.
-   Leaves the rest of the string intact."
+  Leaves the rest of the string intact."
   [s] (henkan s :katakana :hiragana))
 
 (defcljx katakana->hiragana zenkaku-katakana->hiragana)
@@ -578,7 +584,7 @@
 
 (defn zenkaku-katakana->romaji
   "Converts syllabs in katakana to romaji.
-   Leaves the rest of the string intact."
+  Leaves the rest of the string intact."
   [s] (henkan s :katakana :romaji))
 
 (defcljx katakana->romaji zenkaku-katakana->romaji)
@@ -587,7 +593,7 @@
 
 (defn zenkaku-katakana->hebon
   "Converts syllabs in katakana to hebon.
-   Leaves the rest of the string intact."
+  Leaves the rest of the string intact."
   [s] (henkan s :katakana :hebon))
 
 (defcljx katakana->hebon zenkaku-katakana->hebon)
@@ -600,7 +606,7 @@
 
 (defn zenkaku-katakana->kunrei
   "Converts syllabs in katakana to kunrei.
-   Leaves the rest of the string intact."
+  Leaves the rest of the string intact."
   [s] (henkan s :katakana :kunrei-shiki))
 
 (defcljx katakana->kunrei-shiki zenkaku-katakana->kunrei)
@@ -613,7 +619,7 @@
 
 (defn zenkaku-katakana->wapuro
   "Converts syllabs in katakana to wāpuro.
-   Leaves the rest of the string intact."
+  Leaves the rest of the string intact."
   [s] (henkan s :katakana :wapuro))
 
 (defcljx katakana->wapuro zenkaku-katakana->wapuro)
@@ -622,14 +628,14 @@
 
 (defn romaji->hiragana
   "Converts syllabs in romaji to hiragana.
-   Leaves the rest of the string intact."
+  Leaves the rest of the string intact."
   [s] (henkan s :romaji :hiragana))
 
 (defcljx ローマじ->ひらがな romaji->hiragana)
 
 (defn romaji->zenkaku-katakana
   "Converts syllabs in romaji to hiragana.
-   Leaves the rest of the string intact."
+  Leaves the rest of the string intact."
   [s] (henkan s :romaji :katakana))
 
 (defcljx romaji->katakana romaji->zenkaku-katakana)
@@ -638,7 +644,7 @@
 
 (defn romaji->hebon
   "Converts syllabs in romaji to hebon.
-   Leaves the rest of the string intact."
+  Leaves the rest of the string intact."
   [s] (henkan s :romaji :hebon))
 
 (defcljx romaji->hebon-shiki romaji->hebon)
@@ -647,7 +653,7 @@
 
 (defn romaji->kunrei
   "Converts syllabs in romaji to kunrei.
-   Leaves the rest of the string intact."
+  Leaves the rest of the string intact."
   [s] (henkan s :romaji :kunrei-shiki))
 
 (defcljx romaji->kunrei-shiki romaji->kunrei)
@@ -656,14 +662,14 @@
 
 (defn romaji->wapuro
   "Converts syllabs in romaji to wāpuro.
-   Leaves the rest of the string intact."
+  Leaves the rest of the string intact."
   [s] (henkan s :romaji :wapuro))
 
 (defcljx ローマじ->ワープロ romaji->wapuro)
 
 (defn hebon->hiragana
   "Converts syllabs in hebon to hiragana.
-   Leaves the rest of the string intact."
+  Leaves the rest of the string intact."
   [s] (henkan s :hebon :hiragana))
 
 (defcljx hebon-shiki->hiragana hebon->hiragana)
@@ -672,7 +678,7 @@
 
 (defn hebon->zenkaku-katakana
   "Converts syllabs in hebon to katakana.
-   Leaves the rest of the string intact."
+  Leaves the rest of the string intact."
   [s] (henkan s :hebon :katakana))
 
 (defcljx hebon->katakana hebon->zenkaku-katakana)
@@ -685,7 +691,7 @@
 
 (defn hebon->romaji
   "Converts syllabs in hebon to romaji.
-   Leaves the rest of the string intact."
+  Leaves the rest of the string intact."
   [s] (henkan s :hebon :romaji))
 
 (defcljx hebon-shiki->romaji hebon->romaji)
@@ -694,7 +700,7 @@
 
 (defn hebon->kunrei
   "Converts syllabs in hebon to kunrei.
-   Leaves the rest of the string intact."
+  Leaves the rest of the string intact."
   [s] (henkan s :hebon :kunrei-shiki))
 
 (defcljx hebon->kunrei-shiki hebon->kunrei)
@@ -707,7 +713,7 @@
 
 (defn hebon->wapuro
   "Converts syllabs in hebon to wāpuro.
-   Leaves the rest of the string intact."
+  Leaves the rest of the string intact."
   [s] (henkan s :hebon :wapuro))
 
 (defcljx hebon-shiki->wapuro hebon->wapuro)
@@ -716,7 +722,7 @@
 
 (defn kunrei->hiragana
   "Converts syllabs in kunrei to hiragana.
-   Leaves the rest of the string intact."
+  Leaves the rest of the string intact."
   [s] (henkan s :kunrei-shiki :hiragana))
 
 (defcljx kunrei-shiki->hiragana kunrei->hiragana)
@@ -725,7 +731,7 @@
 
 (defn kunrei->zenkaku-katakana
   "Converts syllabs in kunrei to katakana.
-   Leaves the rest of the string intact."
+  Leaves the rest of the string intact."
   [s] (henkan s :kunrei-shiki :katakana))
 
 (defcljx kunrei->katakana kunrei->zenkaku-katakana)
@@ -738,7 +744,7 @@
 
 (defn kunrei->romaji
   "Converts syllabs in kunrei to romaji.
-   Leaves the rest of the string intact."
+  Leaves the rest of the string intact."
   [s] (henkan s :kunrei-shiki :romaji))
 
 (defcljx kunrei-shiki->romaji kunrei->romaji)
@@ -747,7 +753,7 @@
 
 (defn kunrei->hebon
   "Converts syllabs in kunrei to hebon.
-   Leaves the rest of the string intact."
+  Leaves the rest of the string intact."
   [s] (henkan s :kunrei-shiki :hebon))
 
 (defcljx kunrei->hebon-shiki kunrei->hebon)
@@ -760,7 +766,7 @@
 
 (defn kunrei->wapuro
   "Converts syllabs in kunrei to wāpuro.
-   Leaves the rest of the string intact."
+  Leaves the rest of the string intact."
   [s] (henkan s :kunrei-shiki :wapuro))
 
 (defcljx kunrei-shiki->wapuro kunrei->wapuro)

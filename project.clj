@@ -1,10 +1,12 @@
-(defproject namban "0.2.2"
+(defproject namban "0.2.3"
   :description "Clojure(Script) Japanese library for trading between Hiragana, Katakana, Romaji, for identifying script types and more."
+  :url "https://github.com/ccfontes/namban"
+  :license {:name "Eclipse Public License" :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.5.1"]]
   :profiles {:dev {:dependencies [[org.clojure/clojurescript "0.0-2014"]
                                   [org.clojure/tools.namespace "0.2.4"]]
                    :plugins [[com.keminglabs/cljx "0.3.2"]
-                             [codox "0.8.0"]
+                             [codox "0.8.10"]
                              [com.cemerick/clojurescript.test "0.3.0"]
                              [lein-cljsbuild "1.0.0"]
                              [com.cemerick/austin "0.1.3"]]}}

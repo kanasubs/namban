@@ -1,6 +1,6 @@
 (ns ^{:doc "Both clojure and clojurescript macros must be implemented in clojure."}
   namban.clj-macros
-  (:require [namban.kori :refer [cljs?]]
+  (:require [namban.jitsuyo :refer [cljs?]]
             ;[cljs-info.ns :refer [cljs-ns-resolve]]
             ))
 

@@ -37,7 +37,7 @@ user=> (use 'namban.boeki)
 nil
 user=> (hiragana? "ねこがかわいいでしょう")
 true
-user=> (hebon "このパンがおいしい") ; use tools like Kuromoji to segment the text
+user=> (hebon "このパンがおいしい") ; use tools like kuromojure to segment the text
 "konopan'gaoishii"
 user=> (katakana->romaji "このパンがおいしい")
 "このpan'がおいしい"
@@ -45,7 +45,7 @@ user=> (ローマじ->ひらがな "wareware wa uchūjin desu")
 "われわれ わ うちゅうじん です" ; no way to know wa is a particle
 user=> (scripts "こいつぁなあ、南蛮渡来の品もんだぜぇ！")
 #{:kanji :yakumono :hiragana}
-user=> (henkan "nihon e syûpatu" :wapuro :kunrei)
+user=> (henkan "nihon e shuupatsu" :wapuro :kunrei)
 "nihon e syûpatu"
 ```
 
@@ -62,7 +62,7 @@ All occurrences of `ん`, `ン` will be converted to romaji `n'` regardless of t
 
 ### Improving conversions
 
-Tools like [Kuromoji](http://www.atilika.org) segment text which can improve namban's accuracy.
+Tools like [kuromojure](https://github.com/ccfontes/kuromojure) segment text which can improve namban's accuracy.
 
 ### Wishlist
 
@@ -72,7 +72,7 @@ Tools like [Kuromoji](http://www.atilika.org) segment text which can improve nam
 - support hyōjun-shiki script
 - consonant expansion
 
-### Missing something?
+### Something is missing?
 
 Feature requests are welcome!
 
@@ -80,7 +80,7 @@ Feature requests are welcome!
 
 I'll be happy to add your project using namban to this list.
 
-[kanasubs.com](http://www.kanasubs.com) — Convert subtitles in Kanji/Raw to Kana online.
+[kanasubs.com](http://www.kanasubs.com) — Convert raw subtitles in Kanji to Kana online.
 
 ### Japanese language Q&A by
 
@@ -88,7 +88,7 @@ Megumi Imai
 
 ### License
 
-Copyright (C) 2013 Carlos C. Fontes.
+Copyright (C) 2014 Carlos C. Fontes.
 
 Double licensed under the [Eclipse Public License](http://www.eclipse.org/legal/epl-v10.html) (the same as Clojure) or
 the [Apache Public License 2.0](http://www.apache.org/licenses/LICENSE-2.0.html).
