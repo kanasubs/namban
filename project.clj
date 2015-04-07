@@ -1,8 +1,15 @@
-(defproject namban "0.2.3"
+(defproject namban "0.3.0"
   :description "Clojure(Script) Japanese library for trading between Hiragana, Katakana, Romaji, for identifying script types and more."
-  :url "https://github.com/ccfontes/namban"
-  :license {:name "Eclipse Public License" :url "http://www.eclipse.org/legal/epl-v10.html"}
+
+  :url "https://github.com/kanasubs/namban"
+
+  :license {:name "Eclipse Public License"
+            :url "http://www.eclipse.org/legal/epl-v10.html"}
+
+  :scm {:name "git" :url "https://github.com/kanasubs/namban"}
+
   :dependencies [[org.clojure/clojure "1.5.1"]]
+
   :profiles {:dev {:dependencies [[org.clojure/clojurescript "0.0-2014"]
                                   [org.clojure/tools.namespace "0.2.4"]]
                    :plugins [[com.keminglabs/cljx "0.3.2"]
@@ -15,7 +22,8 @@
     {:welcome (do (println "To start Austin, type: (cemerick.piggieback/cljs-repl :repl-env (cemerick.austin/exec-env)). Once in the cljs REPL, you must use/require like, e.g.: (ns cljs.user (:use namban.boeki)).")
                   (println "Type (refresh) to reload all namespaces."))
      :timeout 400000
-     :init (require '[clojure.tools.namespace.repl :refer [refresh]])}
+     :init (require '[clojure.tools.namespace.repl :refer [refresh]])
+     :init-ns namban.boeki}
 
   :cljx {:builds
           [{:source-paths ["src"]
@@ -34,7 +42,7 @@
             :output-path "target/gen-test"
             :rules :cljs}]}
 
-  :codox {:src-dir-uri "https://github.com/ccfontes/namban/blob/master/"
+  :codox {:src-dir-uri "https://github.com/kanasubs/namban/blob/master/"
           :sources ["target/gen-src" "target/gen-test"]
           :src-uri-mapping {#"target/gen-src" #(str "src/" % "x")
                             #"target/gen-test" #(str "test/" % "x")}

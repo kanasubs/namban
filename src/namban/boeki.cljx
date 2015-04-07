@@ -466,71 +466,71 @@
 
 (defcljx へんかん henkan)
 
-(defn hiragana
+(defn ->hiragana
   "Converts syllabs of string to hiragana."
   [s] (henkan s :hiragana))
 
-(defcljx ひらがな hiragana)
+(defcljx ひらがな ->hiragana)
 
-(defn zenkaku-katakana
+(defn ->zenkaku-katakana
   "Converts syllabs of string to zenkaku katakana."
   [s] (henkan s :katakana))
 
-(defcljx katakana zenkaku-katakana)
-(defcljx カタカナ zenkaku-katakana)
-(defcljx ゼンカクカタカナ zenkaku-katakana)
+(defcljx katakana ->zenkaku-katakana)
+(defcljx カタカナ ->zenkaku-katakana)
+(defcljx ゼンカクカタカナ ->zenkaku-katakana)
 
-(defn romaji
+(defn ->romaji
   "Converts syllabs of string to romaji."
   [s] (henkan s :romaji))
 
-(defcljx ローマじ romaji)
+(defcljx ローマじ ->romaji)
 
-(defn hebon
+(defn ->hebon
   "Converts syllabs of string to hebon."
   [s] (henkan s :hebon))
 
-(defcljx hebon-shiki hebon)
-(defcljx ヘボン hebon)
-(defcljx ヘボンしき hebon)
+(defcljx hebon-shiki ->hebon)
+(defcljx ヘボン ->hebon)
+(defcljx ヘボンしき ->hebon)
 
-(defn kunrei
+(defn ->kunrei
   "Converts syllabs of string to kunrei."
   [s] (henkan s :kunrei-shiki))
 
-(defcljx kunrei-shiki kunrei)
-(defcljx くんれい kunrei)
-(defcljx くんれいしき kunrei)
+(defcljx kunrei-shiki ->kunrei)
+(defcljx くんれい ->kunrei)
+(defcljx くんれいしき ->kunrei)
 
-(defn wapuro
+(defn ->wapuro
   "Converts syllabs of string to wāpuro."
   [s] (henkan s :wapuro))
 
-(defcljx ワープロ wapuro)
+(defcljx ワープロ ->wapuro)
 
-(defn romaji-yakumono
+(defn ->romaji-yakumono
   "Returns punctuation in romaji."
   [s] (henkan s :romaji-yakumono))
 
-(defcljx ローマじやくもの romaji-yakumono)
+(defcljx ローマじやくもの ->romaji-yakumono)
 
-(defn yakumono
+(defn ->yakumono
   "Returns punctuation in japanese."
   [s] (henkan s :yakumono))
 
-(defcljx やくもの yakumono)
+(defcljx やくもの ->yakumono)
 
-(defn suji
+(defn ->suji
   "Returns japanese numerals."
   [s] (henkan s :suji))
 
-(defcljx すうじ suji)
+(defcljx すうじ ->suji)
 
-(defn arabia-suji
+(defn ->arabia-suji
   "Returns arabic numerals."
   [s] (henkan s :arabia-suji))
 
-(defcljx アラビアすうじ arabia-suji)
+(defcljx アラビアすうじ ->arabia-suji)
 
 (defn hiragana->zenkaku-katakana
   "Converts syllabs in hiragana to katakana.

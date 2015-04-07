@@ -37,7 +37,7 @@ user=> (use 'namban.boeki)
 nil
 user=> (hiragana? "ねこがかわいいでしょう")
 true
-user=> (hebon "このパンがおいしい") ; use tools like kuromojure to segment the text
+user=> (->hebon "このパンがおいしい") ; use tools like kuromojure or clj-mecab to segment the text
 "konopan'gaoishii"
 user=> (katakana->romaji "このパンがおいしい")
 "このpan'がおいしい"
@@ -62,7 +62,9 @@ All occurrences of `ん`, `ン` will be converted to romaji `n'` regardless of t
 
 ### Improving conversions
 
-Tools like [kuromojure](https://github.com/ccfontes/kuromojure) segment text which can improve namban's accuracy.
+Tools like [kuromojure](https://github.com/ccfontes/kuromojure) or
+[clj-mecab](https://github.com/borh/clj-mecab) segment text which can improve
+namban's accuracy.
 
 ### Wishlist
 
@@ -76,19 +78,13 @@ Tools like [kuromojure](https://github.com/ccfontes/kuromojure) segment text whi
 
 Feature requests are welcome!
 
-### Using namban?
-
-I'll be happy to add your project using namban to this list.
-
-[kanasubs.com](http://www.kanasubs.com) — Convert raw subtitles in Kanji to Kana online.
-
 ### Japanese language Q&A by
 
 Megumi Imai
 
 ### License
 
-Copyright (C) 2014 Carlos C. Fontes.
+Copyright (C) 2015 Carlos C. Fontes.
 
 Double licensed under the [Eclipse Public License](http://www.eclipse.org/legal/epl-v10.html) (the same as Clojure) or
 the [Apache Public License 2.0](http://www.apache.org/licenses/LICENSE-2.0.html).
