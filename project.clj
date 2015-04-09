@@ -18,6 +18,8 @@
                              [lein-cljsbuild "1.0.0"]
                              [com.cemerick/austin "0.1.3"]]}}
 
+  :auto-clean false ; 'install' will include sources gen by 'cljx once'
+
   :repl-options
     {:welcome (do (println "To start Austin, type: (cemerick.piggieback/cljs-repl :repl-env (cemerick.austin/exec-env)). Once in the cljs REPL, you must use/require like, e.g.: (ns cljs.user (:use namban.boeki)).")
                   (println "Type (refresh) to reload all namespaces."))
